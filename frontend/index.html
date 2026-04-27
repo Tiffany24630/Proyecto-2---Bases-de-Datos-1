@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <h1>Gestor de empresas</h1>
+
+        <button onclick="cargar()">Ver Ventas</button>
+
+        <script>
+            async function cargar() {
+            const res = await fetch('http://localhost:3000/ventas');
+            const data = await res.json();
+            console.log(data);
+            }
+        </script>
+
+    </body>
+</html>

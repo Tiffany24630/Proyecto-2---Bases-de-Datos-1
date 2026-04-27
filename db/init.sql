@@ -7,6 +7,12 @@ CREATE TABLE proveedor (
     email VARCHAR(255) NOT NULL
 )
 
+CREATE TABLE categoria (
+    id_cat SERIAL PRIMARY KEY,
+    nombre VARCHAR(255) NOT NULL,
+    descripcion TEXT
+)
+
 CREATE TABLE producto (
     id_prod SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
@@ -14,12 +20,6 @@ CREATE TABLE producto (
     stock INT NOT NULL,
     FOREIGN KEY (id_prov) REFERENCES proveedor(id_prov),
     FOREIGN KEY (id_cat) REFERENCES categoria(id_cat)
-)
-
-CREATE TABLE categoria (
-    id_cat SERIAL PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
-    descripcion TEXT
 )
 
 CREATE TABLE cliente (
@@ -73,7 +73,7 @@ INSERT INTO Proveedor (nombre, telefono) VALUES
 ('Proveedor 23','10000023'), ('Proveedor 24','10000024'),
 ('Proveedor 25','10000025');
 
-INSERT INTO Producto (nombre, precio, stock, id_categoria, id_proveedor) VALUES
+INSERT INTO Producto (nombre, precio, stock, id_cat, id_prov) VALUES
 ('Mouse',15,50,1,1), ('Teclado',25,40,1,2), ('Monitor',120,20,1,3),
 ('Camisa',20,60,2,4), ('Pantalón',30,50,2,5),
 ('Sofá',200,10,3,6), ('Mesa',150,15,3,7),
@@ -117,7 +117,7 @@ INSERT INTO Empleado (nombre, cargo) VALUES
 ('Empleado 23','Gerente'), ('Empleado 24','Soporte'),
 ('Empleado 25','Vendedor');
 
-INSERT INTO Venta (fecha, id_cliente, id_empleado) VALUES
+INSERT INTO Venta (fecha, id_clien, id_emp) VALUES
 ('2024-01-01',1,1), ('2024-01-02',2,2), ('2024-01-03',3,3),
 ('2024-01-04',4,4), ('2024-01-05',5,5),
 ('2024-01-06',6,6), ('2024-01-07',7,7),
@@ -131,7 +131,7 @@ INSERT INTO Venta (fecha, id_cliente, id_empleado) VALUES
 ('2024-01-22',22,22), ('2024-01-23',23,23),
 ('2024-01-24',24,24), ('2024-01-25',25,25);
 
-INSERT INTO DetalleVenta (id_venta, id_producto, cantidad, precio_unitario) VALUES
+INSERT INTO DetalleVenta (id_ven, id_prod, cantidad, precio_unit) VALUES
 (1,1,2,15),(2,2,1,25),(3,3,1,120),(4,4,2,20),(5,5,1,30),
 (6,6,1,200),(7,7,2,150),(8,8,3,18),(9,9,1,300),(10,10,2,25),
 (11,11,1,15),(12,12,2,10),(13,13,1,12),(14,14,1,50),(15,15,2,8),

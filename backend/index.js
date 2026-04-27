@@ -19,13 +19,14 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 });
 
-app.get("/", async (req, res) => {
-  try {
-    const result = await pool.query("SELECT NOW()");
-    res.json(result.rows);
-  } catch (error) {
-    res.status(500).json(error.message);
-  }
+app.get("/ventas", async (req, res) => {
+  const result = await pool.query(`
+    SELECT v.id_ven, c.nombre AS cliente, e.nombre AS empleado
+    FROM venta v
+    JOIN cliente c ON v.id_clien = c.id_clien
+    JOIN empleado e ON v.id_emp = e.id_emp
+  `);
+  res.json(result.rows);
 });
 
 app.listen(3000, () => {
