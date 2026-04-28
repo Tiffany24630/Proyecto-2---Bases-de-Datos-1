@@ -141,3 +141,9 @@ INSERT INTO DetalleVenta (id_ven, id_prod, cantidad, precio_unit) VALUES
 --Índices de venta y producto para encontrar rápidamente los productos por nombre y las ventas por fecha
 CREATE INDEX idx_producto_nombre ON producto(nombre);
 CREATE INDEX idx_venta_fecha ON venta(fecha);
+
+--Vista de ventas
+CREATE VIEW vista_ventas AS
+SELECT v.id_ven, c.nombre AS cliente
+FROM venta v
+JOIN cliente c ON v.id_clien = c.id_clien;
