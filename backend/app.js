@@ -123,4 +123,64 @@ app.post("/clientes", async (req, res) => {
   }
 });
 
+app.get("/clientes", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM cliente");
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/clientes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre } = req.body;
+
+    await pool.query(
+      "UPDATE cliente SET nombre=$1 WHERE id_clien=$2",
+      [nombre, id]
+    );
+
+    res.json({ message: "Cliente actualizado" });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/clientes/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      "DELETE FROM cliente WHERE id_clien=$1",
+      [id]
+    );
+
+    res.json({ message: "Cliente eliminado" });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/productos", async (req, res) => {
+  try {
+    const { nombre, precio, stock, id_prov, id_cat } = req.body;
+
+    await pool.query(
+      `INSERT INTO producto (nombre, precio, stock, id_prov, id_cat)
+       VALUES ($1,$2,$3,$4,$5)`,
+      [nombre, precio, stock, id_prov, id_cat]
+    );
+
+    res.json({ message: "Producto creado" });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 export default app;
