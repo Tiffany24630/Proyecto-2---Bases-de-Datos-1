@@ -183,4 +183,46 @@ app.post("/productos", async (req, res) => {
 });
 
 
+app.get("/productos", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT * FROM producto");
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put("/productos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { nombre } = req.body;
+
+    await pool.query(
+      "UPDATE producto SET nombre=$1 WHERE id_prod=$2",
+      [nombre, id]
+    );
+
+    res.json({ message: "Producto actualizado" });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete("/productos/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      "DELETE FROM producto WHERE id_prod=$1",
+      [id]
+    );
+
+    res.json({ message: "Producto eliminado" });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default app;
