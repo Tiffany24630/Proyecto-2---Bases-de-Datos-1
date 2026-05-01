@@ -1,0 +1,89 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #4a5969;
+  color: #333;
+}
+
+/* HEADER */
+header {
+  background: #35424c;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+}
+
+/* CONTENEDOR */
+.container {
+  padding: 20px;
+}
+
+/* TARJETAS */
+.card {
+  background: white;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* INPUTS */
+input {
+  padding: 8px;
+  margin: 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+/* BOTONES */
+button {
+  padding: 8px 12px;
+  margin: 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  color: white;
+  background: #73beb0;
+}
+
+button:hover {
+  background: #5d838a;
+}
+
+/* BOTONES SECUNDARIOS */
+.btn-secondary {
+  background: #427973;
+}
+
+.btn-secondary:hover {
+  background: #5d838a;
+}
+
+/* TABLAS */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th {
+  background: #35424c;
+  color: white;
+  padding: 10px;
+}
+
+td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+/* MENSAJES */
+#mensaje {
+  color: #ffdddd;
+  font-weight: bold;
+}

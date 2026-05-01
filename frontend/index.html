@@ -5,35 +5,81 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Gestor de empresas</title>
+        <link rel="stylesheet" href="styles.css">
     </head>
+
     <body>
-        <h1>Gestor de Ventas</h1>
-        <h2>Clientes</h2>
+        <header>Gestiona tu Empresa</header>
+        <div class="container">
+            <div class="card">
+                <h2>Clientes</h2>
 
-        <input id="nombre" placeholder="Nombre">
-        <input id="email" placeholder="Email">
-        <input id="telefono" placeholder="Teléfono">
-        <br><br>
+                <input id="nombre" placeholder="Nombre">
+                <input id="email" placeholder="Email">
+                <input id="telefono" placeholder="Teléfono">
+                <br><br>
 
-        <button onClick="crearCliente()">Crear</button>
-        <button onClick="cargarClientes()">Cargar</button>
-        <br><br>
-        
-        <ul id="listadoClientes"></ul>
-        <hr>
+                <button onClick="crearCliente()">Crear</button>
+                <button class="btn-secondary" onClick="cargarClientes()">Cargar</button>
+                <br><br>
 
-        <h2>Reportes</h2>
+                <table>
+                    <thread>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thread>
+                    <tbody id="listadoClientes"></tbody>
+                </table>
+            </div>
 
-        <button onClick="verVentas()">Ver Ventas</button>
-        <button onClick="verReporte()">Reporte Clientes</button>
-        <pre id="resultado"></pre>
-        <hr>
+            <div class="card">
+                <h2>Productos</h2>
+                <input id="nombreProducto" placeholder="Nombre">
+                <input id="precioProducto" placeholder="Precio">
+                <br><br>
 
-        <p id="mensaje" style="color: red;"></p>
+                <button onClick="crearProducto()">Crear</button>
+                <button class="btn-secondary" onClick="cargarProductos()">Cargar</button>
+                <br><br>
+
+                <table>
+                    <thread>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thread>
+                    <tbody id="listadoProductos"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Reportes</h2>
+                <button onClick="cargarReporteVentas()">Reporte de Ventas</button>
+                <br><br>
+                <table>
+                    <thread>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad Vendida</th>
+                        </tr>
+                    </thread>
+                    <tbody id="listadoReporte"></tbody>
+                </table>
+            </div>
+            <p id="mensaje"></p>
+        </div>
+
         <script>
             const API = "http://localhost:3000";
-            function mostrarError(msg){
-                document.getElementById("mensaje").innerText = msg;
+            function msg(t){
+                document.getElementById("mensaje").innerText = t;
             }
 
             async function crearCliente(){
@@ -41,7 +87,7 @@
                     const nombre = document.getElementById("nombre").value;
 
                     if(!nombre){
-                        return mostrarError("Debe indicar nombre");
+                        return msg("Debe indicar nombre");
                     }
 
                     await fetch(API + "/clientes", {
