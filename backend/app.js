@@ -72,7 +72,21 @@ app.get("/reporte-ventas", async (req, res) => {
     JOIN producto p ON dv.id_prod = p.id_prod
     GROUP BY p.nombre
   `);
+  res.json(result.rows);
+});
 
+app.get("/reporte-cte", async (req, res) => {
+  const result = await pool.query(`
+    WITH total_compras AS (
+      SELECT v.id_clien, SUM(cantidad * precio) AS total
+      FROM detalle_venta dv
+      JOIN producto p ON dv.id_prod = p.id_prod
+      GROUP BY id_clien
+    )
+    SELECT c.nombre, tc.total
+    FROM cliente c
+    JOIN total_compras tc ON c.id_clien = tc.id_clien
+  `);
   res.json(result.rows);
 });
 
