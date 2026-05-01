@@ -90,4 +90,33 @@ app.get("/reporte-cte", async (req, res) => {
   res.json(result.rows);
 });
 
+app.get("/vista-ventas", async (req, res) => {
+  const result = await pool.query(`SELECT * FROM vista_ventas`);
+  res.json(result.rows);
+});
+
+app.post("/venta", async (req, res) => {
+  const client = await pool.connect();
+
+  try{
+    await client.query("BEGIN");
+
+    const venta = await client.query("INSERT INTO venta (fecha, id_clien, id_emp) VALUES (NOW(), 1, 1) RETURNING id_ven");
+    
+    const idVenta = venta.rows[0].id_ven;
+    await client.query(
+      "INSERT INTO detalle_venta (cantidad, precio_unit, id_ven, id_prod) VALUES (1, 50, $1, 1)",
+      [idVenta]
+    );
+
+    await client.query("COMMIT");
+    res.json({message: "Venta creada", idVenta});
+  }catch(error){
+    await client.query("ROLLBACK");
+    res.status(500).json({error: error.message});
+  }finally{
+    client.release()
+  }
+});
+
 export default app;
