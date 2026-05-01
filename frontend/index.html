@@ -35,15 +35,11 @@
                     <tbody id="listadoClientes"></tbody>
                 </table>
             </div>
+            <p id="mensaje"></p>
 
             <div class="card">
                 <h2>Productos</h2>
-                <input id="nombreProducto" placeholder="Nombre">
-                <input id="precioProducto" placeholder="Precio">
-                <br><br>
-
-                <button onClick="crearProducto()">Crear</button>
-                <button class="btn-secondary" onClick="cargarProductos()">Cargar</button>
+                <button onClick="cargarProductos()">Cargar Productos</button>
                 <br><br>
 
                 <table>
@@ -58,6 +54,7 @@
                     <tbody id="listadoProductos"></tbody>
                 </table>
             </div>
+            <p id="mensaje"></p>
 
             <div class="card">
                 <h2>Reportes</h2>
@@ -129,8 +126,8 @@
 
             async function eliminarCliente(id){
                 await fetch(API + "/clientes/" + id, {method:"DELETE"});
-                    cargarClientes();
-                }
+                cargarClientes();
+            }
 
             async function editarCliente(id){
                 const nuevo = prompt("Nuevo nombre:");
@@ -141,8 +138,57 @@
                     headers:{"Content-Type":"application/json"},
                     body:JSON.stringify({nombre:nuevo})
                 });
-
                 cargarClientes();
+            }
+
+            async function crearProducto(){
+                const nombre = document.getElementById("nombreProducto").value;
+                const precio = document.getElementById("precioProducto").value;
+
+                if(!nombre || !precio) return msg("Datos incompletos");
+
+                await fetch(API + "/productos",{
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({nombre, precio})
+                });
+                cargarProductos();
+            }
+
+            async function cargarProductos(){
+                const res = await fetch(API + "/productos");
+                const data = await res.json();
+
+                const tbody = document.getElementById("listadoProductos");
+                tbody.innerHTML = "";
+
+                data.forEach(p=>{
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${p.id_prod}</td>
+                        <td>${p.nombre}</td>
+                        <td>${p.precio}</td>
+                        <td>-</td>
+                    </tr>
+                    `;
+                });
+            }
+
+            async function cargarReporteVentas(){
+                const res = await fetch(API + "/reporte-ventas");
+                const data = await res.json();
+
+                const tbody = document.getElementById("listadoReporte");
+                tbody.innerHTML = "";
+
+                data.forEach(r=>{
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${r.producto}</td>
+                        <td>${r.total_vendido}</td>
+                    </tr>
+                    `;
+                });
             }
         </script>
     </body>
