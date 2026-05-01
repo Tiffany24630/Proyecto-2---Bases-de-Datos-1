@@ -1,17 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Gestor de empresas</title>
+    </head>
     <body>
-        <h1>Gestor de empresas</h1>
+        <h1>Gestor de Ventas</h1>
+        <h2>Clientes</h2>
 
-        <button onclick="cargar()">Ver Ventas</button>
+        <input id="nombre" placeholder="Nombre">
+        <input id="email" placeholder="Email">
+        <input id="telefono" placeholder="Teléfono">
+        <br><br>
 
+        <button onClick="crearCliente()">Crear</button>
+        <button onClick="cargarClientes()">Cargar</button>
+        <br><br>
+        
+        <ul id="listadoClientes"></ul>
+        <hr>
+
+        <h2>Reportes</h2>
+
+        <button onClick="verVentas()">Ver Ventas</button>
+        <button onClick="verReporte()">Reporte Clientes</button>
+        <pre id="resultado"></pre>
+        <hr>
+
+        <p id="mensaje" style="color: red;"></p>
         <script>
-            async function cargar() {
-                const res = await fetch('http://localhost:3000/ventas');
-                const data = await res.json();
-                console.log(data);
+            const API = "http://localhost:3000";
+            function mostrarError(msg){
+                document.getElementById("mensaje").innerText = msg;
+            }
+
+            async function crearCliente(){
+                try{
+                    const nombre = document.getElementById("nombre").value;
+
+                    if(!nombre){
+                        return mostrarError("Debe indicar nombre");
+                    }
+
+                    await fetch(API + "/clientes", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            nombre,
+                            email: document.getElementById("email").value,
+                            telefono: document.getElementById("telefono").value
+                        })
+                    });
+
+                    mostrarError("Cliente creado correctamente")
+                    cargarClientes();
+                }catch(error){
+                    mostrarError("Error al crear cliente.");
+                }
+            }
+
+            async function cargarClientes(){
+                try{
+                    const res = await fetch(API + "/clientes");
+                    const data =await res.json();
+                    const listado = document.getElementById("listadoClientes");
+                    listado.innerHTML = "";
+
+                    data.forEach(c=>{
+                        const li = document.createElement("li");
+                        li.innerHTML = `${c.nombre}
+                        <button onclick="eliminarCliente(${c.id_cliente})">Eliminar</button>
+                        <button onclick="editarCliente(${c.id_cliente})">Editar</button>
+                        `;
+                        listado.appendChild(li);
+                    });
+                }catch(error){
+                    mostrarError("Error al cargar clientes.");
+                }
+            }
+
+            async function editarCliente(id){
+                const nuevo = prompt("Nuevo nombre:");
+
+                if(!nuevo){return;}
+
+                await fetch(API + "/clientes/" + id, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({nombre: nuevo})
+                });
+                cargarClientes();
             }
         </script>
-
     </body>
 </html>
