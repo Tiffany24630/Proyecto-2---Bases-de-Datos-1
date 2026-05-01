@@ -59,6 +59,11 @@
             <div class="card">
                 <h2>Reportes</h2>
                 <button onClick="cargarReporteVentas()">Reporte de Ventas</button>
+                <button onclick="cargarReporteVentas()">JOIN + GROUP BY</button>
+                <button onclick="cargarClientesActivos()">Subquery</button>
+                <button onclick="cargarCTE()">CTE</button>
+                <button onclick="cargarVista()">VIEW</button>
+                <button onclick="crearVenta()">Crear Venta (Transacción)</button>
                 <br><br>
                 <table>
                     <thread>
@@ -189,6 +194,50 @@
                     </tr>
                     `;
                 });
+            }
+
+            async function cargarCTE(){
+                const res = await fetch(API + "/reporte-cte");
+                const data = await res.json();
+                const tbody = document.getElementById("listadoReporte");
+                tbody.innerHTML = "";
+
+                data.forEach(r=>{
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${r.id_clien}</td>
+                        <td>${r.total}</td>
+                    </tr>
+                    `;
+                });
+            }
+
+            async function cargarVista(){
+                const res = await fetch(API + "/vista-ventas");
+                const data = await res.json();
+
+                const tbody = document.getElementById("listadoReporte");
+                tbody.innerHTML = "";
+
+                data.forEach(r=>{
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${r.id_ven}</td>
+                        <td>${r.cliente}</td>
+                    </tr>
+                    `;
+                });
+            }
+
+            async function crearVenta(){
+                try{
+                    const res = await fetch(API + "/venta", {method:"POST"});
+                    const data = await res.json();
+
+                    msg("Venta creada ID: " + data.idVenta);
+                }catch{
+                    msg("Error en la transacción");
+                }
             }
         </script>
     </body>
