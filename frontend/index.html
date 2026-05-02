@@ -24,14 +24,14 @@
                 <br><br>
 
                 <table>
-                    <thread>
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Email</th>
                             <th>Acciones</th>
                         </tr>
-                    </thread>
+                    </thead>
                     <tbody id="listadoClientes"></tbody>
                 </table>
             </div>
@@ -43,14 +43,14 @@
                 <br><br>
 
                 <table>
-                    <thread>
+                    <thead>
                         <tr>
                             <th>ID</th>
                             <th>Nombre</th>
                             <th>Precio</th>
                             <th>Acciones</th>
                         </tr>
-                    </thread>
+                    </thead>
                     <tbody id="listadoProductos"></tbody>
                 </table>
             </div>
@@ -60,20 +60,39 @@
                 <h2>Reportes</h2>
                 <button onClick="cargarReporteVentas()">Reporte de Ventas</button>
                 <button onclick="cargarReporteVentas()">JOIN + GROUP BY</button>
-                <button onclick="cargarClientesActivos()">Subquery</button>
+                <button onclick="cargarSubquery()">Subquery</button>
                 <button onclick="cargarCTE()">CTE</button>
                 <button onclick="cargarVista()">VIEW</button>
-                <button onclick="crearVenta()">Crear Venta (Transacción)</button>
                 <br><br>
                 <table>
-                    <thread>
+                    <thead>
                         <tr>
                             <th>Producto</th>
                             <th>Cantidad Vendida</th>
                         </tr>
-                    </thread>
+                    </thead>
                     <tbody id="listadoReporte"></tbody>
                 </table>
+
+                <h2>Crear Nueva Venta</h2>
+                <h3>Cliente</h3>
+                <select id="clienteVenta"></select>
+                <br><br>
+
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaVenta"></tbody>
+                </table>
+            <br>
+            <button onclick="agregarFila()">+ Agregar fila</button>
+            <button onclick="guardarVenta()">Guardar Venta</button>
             </div>
             <p id="mensaje"></p>
         </div>
@@ -107,23 +126,18 @@
                 }
             }
 
-            async function cargarClientes(){
-                const res = await fetch(API + "/clientes");
+            async function cargarClientesActivos(){
+                const res = await fetch(API + "/reporte-subquery");
                 const data = await res.json();
 
-                const tbody = document.getElementById("listadoClientes");
+                const tbody = document.getElementById("listadoReporte");
                 tbody.innerHTML = "";
 
-                data.forEach(c=>{
+                data.forEach(r=>{
                     tbody.innerHTML += `
                     <tr>
-                        <td>${c.id_clien}</td>
-                        <td>${c.nombre}</td>
-                        <td>${c.email || ""}</td>
-                        <td>
-                        <button onclick="editarCliente(${c.id_clien})">Editar</button>
-                        <button onclick="eliminarCliente(${c.id_clien})">Eliminar</button>
-                        </td>
+                        <td>${r.nombre}</td>
+                        <td>-</td>
                     </tr>
                     `;
                 });
@@ -135,13 +149,16 @@
             }
 
             async function editarCliente(id){
-                const nuevo = prompt("Nuevo nombre:");
-                if(!nuevo) return;
+                const nombre = prompt("Nuevo nombre:");
+                const email = prompt("Nuevo email:");
+                const telefono = prompt("Nuevo teléfono:");
+
+                if(!nombre || !email || !telefono) return;
 
                 await fetch(API + "/clientes/" + id,{
                     method:"PUT",
                     headers:{"Content-Type":"application/json"},
-                    body:JSON.stringify({nombre:nuevo})
+                    body:JSON.stringify({nombre, email, telefono})
                 });
                 cargarClientes();
             }
@@ -183,50 +200,38 @@
                 const res = await fetch(API + "/reporte-ventas");
                 const data = await res.json();
 
-                const tbody = document.getElementById("listadoReporte");
-                tbody.innerHTML = "";
-
-                data.forEach(r=>{
-                    tbody.innerHTML += `
-                    <tr>
-                        <td>${r.producto}</td>
-                        <td>${r.total_vendido}</td>
-                    </tr>
-                    `;
-                });
+                renderTabla(
+                    ["ID Venta","Fecha","Cliente","Producto","Cantidad","Precio"],
+                    data.map(r=>[
+                        r.id_ven,
+                        new Date(r.fecha).toLocaleDateString(),
+                        r.cliente,
+                        r.producto,
+                        r.cantidad,
+                        r.precio_unit
+                    ])
+                );
             }
 
             async function cargarCTE(){
                 const res = await fetch(API + "/reporte-cte");
                 const data = await res.json();
-                const tbody = document.getElementById("listadoReporte");
-                tbody.innerHTML = "";
 
-                data.forEach(r=>{
-                    tbody.innerHTML += `
-                    <tr>
-                        <td>${r.id_clien}</td>
-                        <td>${r.total}</td>
-                    </tr>
-                    `;
-                });
+                renderTabla(["Cliente","Total"], data.map(r=>[r.nombre, r.total]));
+            }
+
+            async function cargarSubquery(){
+                const res = await fetch(API + "/reporte-subquery");
+                const data = await res.json();
+
+                renderTabla(["Cliente","-"], data.map(r=>[r.nombre, "-"]));
             }
 
             async function cargarVista(){
                 const res = await fetch(API + "/vista-ventas");
                 const data = await res.json();
 
-                const tbody = document.getElementById("listadoReporte");
-                tbody.innerHTML = "";
-
-                data.forEach(r=>{
-                    tbody.innerHTML += `
-                    <tr>
-                        <td>${r.id_ven}</td>
-                        <td>${r.cliente}</td>
-                    </tr>
-                    `;
-                });
+                renderTabla(["Venta","Cliente"], data.map(r=>[r.id_ven, r.cliente]));
             }
 
             async function crearVenta(){
@@ -239,6 +244,132 @@
                     msg("Error en la transacción");
                 }
             }
+
+            async function guardarVenta(){
+                const filas = document.querySelectorAll("#tablaVenta tr");
+
+                if(filas.length === 0){
+                    return msg("Agrega al menos un producto");
+                }
+
+                const detalles = [];
+
+                filas.forEach(fila=>{
+                    const id_prod = fila.querySelector("select").value;
+                    const cantidad = fila.querySelectorAll("input")[0].value;
+                    const precio = fila.querySelectorAll("input")[1].value;
+
+                    detalles.push({ id_prod, cantidad, precio });
+                });
+
+                const id_clien = document.getElementById("clienteVenta").value;
+
+                const res = await fetch(API + "/venta", {
+                    method:"POST",
+                    headers:{"Content-Type":"application/json"},
+                    body:JSON.stringify({ detalles, id_clien })
+                });
+
+                const data = await res.json();
+                msg("Venta creada ID: " + data.idVenta);
+            }
+
+            function renderTabla(headers, rows){
+                const table = document.querySelector("#listadoReporte").closest("table");
+
+                const thead = table.querySelector("thead");
+                thead.innerHTML = "<tr>" + headers.map(h => `<th>${h}</th>`).join("") + "</tr>";
+
+                const tbody = table.querySelector("#listadoReporte");
+                tbody.innerHTML = "";
+
+                rows.forEach(row=>{
+                    let tr = "<tr>";
+                    row.forEach(col=>{
+                        tr += `<td>${col}</td>`;
+                    });
+                    tr += "</tr>";
+                    tbody.innerHTML += tr;
+                });
+            }
+
+            let clientes = [];
+
+            async function cargarClientesSelect(){
+                const res = await fetch(API + "/clientes");
+                clientes = await res.json();
+
+                const select = document.getElementById("clienteVenta");
+
+                select.innerHTML = clientes.map(c =>
+                    `<option value="${c.id_clien}">${c.nombre}</option>`
+                ).join("");
+            }
+
+            let productos = [];
+
+            async function cargarProductosSelect(){
+                const res = await fetch(API + "/productos");
+                productos = await res.json();
+            }
+
+            function agregarFila(){
+                const tbody = document.getElementById("tablaVenta");
+
+                const opciones = productos.map(p =>
+                    `<option value="${p.id_prod}" data-precio="${p.precio}">
+                        ${p.nombre}
+                    </option>`
+                ).join("");
+
+                const fila = document.createElement("tr");
+
+                fila.innerHTML = `
+                    <td>
+                        <select onchange="actualizarPrecio(this)">
+                            ${opciones}
+                        </select>
+                    </td>
+                    <td><input type="number" value="1"></td>
+                    <td><input type="number" class="precio"></td>
+                    <td><button onclick="this.parentElement.parentElement.remove()">X</button></td>
+                `;
+
+                tbody.appendChild(fila);
+            }
+
+            function actualizarPrecio(select){
+                const precio = select.selectedOptions[0].dataset.precio;
+                select.parentElement.parentElement.querySelector(".precio").value = precio;
+            }
+
+            async function cargarClientes(){
+                const res = await fetch(API + "/clientes");
+                const data = await res.json();
+
+                const tbody = document.getElementById("listadoClientes");
+                tbody.innerHTML = "";
+
+                data.forEach(c=>{
+                    tbody.innerHTML += `
+                    <tr>
+                        <td>${c.id_clien}</td>
+                        <td>${c.nombre}</td>
+                        <td>${c.email || ""}</td>
+                        <td>
+                            <button onclick="editarCliente(${c.id_clien})">Editar</button>
+                            <button onclick="eliminarCliente(${c.id_clien})">Eliminar</button>
+                        </td>
+                    </tr>
+                    `;
+                });
+            }
+
+            window.onload = async () => {
+                await cargarProductosSelect();
+                await cargarClientesSelect();
+                agregarFila();
+            };
         </script>
     </body>
 </html>

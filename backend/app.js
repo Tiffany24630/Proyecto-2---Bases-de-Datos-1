@@ -3,7 +3,9 @@ import pool from "./db.js";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 app.use(express.json());
 
 app.get("/clientes", async (req, res) => {
@@ -28,11 +30,13 @@ app.post("/clientes", async (req, res) => {
 
 app.put("/clientes/:id", async (req, res) => {
   const { id } = req.params;
-  const { nombre } = req.body;
+  const { nombre, email, telefono } = req.body;
 
   await pool.query(
-    "UPDATE cliente SET nombre=$1 WHERE id_clien=$2",
-    [nombre, id]
+    `UPDATE cliente 
+     SET nombre=$1, email=$2, telefono=$3 
+     WHERE id_clien=$4`,
+    [nombre, email, telefono, id]
   );
 
   res.json({ message: "Cliente actualizado" });
@@ -67,21 +71,30 @@ app.post("/productos", async (req, res) => {
 
 app.get("/reporte-ventas", async (req, res) => {
   const result = await pool.query(`
-    SELECT p.nombre AS producto, SUM(dv.cantidad) AS total_vendido
-    FROM detalle_venta dv
+    SELECT 
+      v.id_ven,
+      v.fecha,
+      c.nombre AS cliente,
+      p.nombre AS producto,
+      dv.cantidad,
+      dv.precio_unit
+    FROM venta v
+    JOIN cliente c ON v.id_clien = c.id_clien
+    JOIN detalle_venta dv ON v.id_ven = dv.id_ven
     JOIN producto p ON dv.id_prod = p.id_prod
-    GROUP BY p.nombre
+    ORDER BY v.id_ven DESC
   `);
+
   res.json(result.rows);
 });
 
 app.get("/reporte-cte", async (req, res) => {
   const result = await pool.query(`
     WITH total_compras AS (
-      SELECT v.id_clien, SUM(cantidad * precio) AS total
+      SELECT v.id_clien, SUM(dv.cantidad * dv.precio_unit) AS total
       FROM detalle_venta dv
-      JOIN producto p ON dv.id_prod = p.id_prod
-      GROUP BY id_clien
+      JOIN venta v ON dv.id_ven = v.id_ven
+      GROUP BY v.id_clien
     )
     SELECT c.nombre, tc.total
     FROM cliente c
@@ -97,26 +110,47 @@ app.get("/vista-ventas", async (req, res) => {
 
 app.post("/venta", async (req, res) => {
   const client = await pool.connect();
+  const { detalles, id_clien } = req.body;
 
-  try{
+  try {
     await client.query("BEGIN");
 
-    const venta = await client.query("INSERT INTO venta (fecha, id_clien, id_emp) VALUES (NOW(), 1, 1) RETURNING id_ven");
-    
-    const idVenta = venta.rows[0].id_ven;
-    await client.query(
-      "INSERT INTO detalle_venta (cantidad, precio_unit, id_ven, id_prod) VALUES (1, 50, $1, 1)",
-      [idVenta]
+    const venta = await client.query(
+      "INSERT INTO venta (fecha, id_clien, id_emp) VALUES (NOW(), $1, 1) RETURNING id_ven",
+      [id_clien]
     );
 
+    const idVenta = venta.rows[0].id_ven;
+
+    for (const d of detalles) {
+      await client.query(
+        `INSERT INTO detalle_venta (cantidad, precio_unit, id_ven, id_prod)
+         VALUES ($1, $2, $3, $4)`,
+        [d.cantidad, d.precio, idVenta, d.id_prod]
+      );
+    }
+
     await client.query("COMMIT");
-    res.json({message: "Venta creada", idVenta});
-  }catch(error){
+
+    res.json({ message: "Venta creada", idVenta });
+
+  } catch (error) {
     await client.query("ROLLBACK");
-    res.status(500).json({error: error.message});
-  }finally{
-    client.release()
+    res.status(500).json({ error: error.message });
+  } finally {
+    client.release();
   }
+});
+
+app.get("/reporte-subquery", async (req, res) => {
+  const result = await pool.query(`
+    SELECT nombre
+    FROM cliente
+    WHERE id_clien IN (
+      SELECT id_clien FROM venta
+    )
+  `);
+  res.json(result.rows);
 });
 
 export default app;
