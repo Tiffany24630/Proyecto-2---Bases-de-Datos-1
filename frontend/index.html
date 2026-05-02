@@ -224,7 +224,7 @@
                 const res = await fetch(API + "/reporte-subquery");
                 const data = await res.json();
 
-                renderTabla(["Cliente","-"], data.map(r=>[r.nombre, "-"]));
+                renderTabla(["Cliente","Total de Compras"], data.map(r=>[r.nombre, r.total_ventas || 0]));
             }
 
             async function cargarVista(){
@@ -270,6 +270,9 @@
                     body:JSON.stringify({ detalles, id_clien })
                 });
 
+                await cargarReporteVentas();
+                await cargarSubquery();
+                await cargarCTE();
                 const data = await res.json();
                 msg("Venta creada ID: " + data.idVenta);
             }

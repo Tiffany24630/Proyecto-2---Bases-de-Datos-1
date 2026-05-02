@@ -144,11 +144,14 @@ app.post("/venta", async (req, res) => {
 
 app.get("/reporte-subquery", async (req, res) => {
   const result = await pool.query(`
-    SELECT nombre
-    FROM cliente
-    WHERE id_clien IN (
+    SELECT c.nombre,
+       (SELECT COUNT(*) 
+        FROM venta v 
+        WHERE v.id_clien = c.id_clien) AS total_ventas
+    FROM cliente c
+    WHERE c.id_clien IN (
       SELECT id_clien FROM venta
-    )
+    );
   `);
   res.json(result.rows);
 });
