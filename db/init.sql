@@ -5,75 +5,93 @@ CREATE TABLE proveedor (
     nombre VARCHAR(255) NOT NULL,
     telefono VARCHAR(20) NOT NULL,
     email VARCHAR(255) NOT NULL
-)
+);
 
 CREATE TABLE categoria (
     id_cat SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT
-)
+);
 
 CREATE TABLE producto (
     id_prod SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     stock INT NOT NULL,
+    id_prov INT,
+    id_cat INT,
     FOREIGN KEY (id_prov) REFERENCES proveedor(id_prov),
     FOREIGN KEY (id_cat) REFERENCES categoria(id_cat)
-)
+);
 
 CREATE TABLE cliente (
     id_clien SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     telefono VARCHAR(20) NOT NULL,
     email VARCHAR(255) NOT NULL
-)
+);
 
 CREATE TABLE empleado (
     id_emp SERIAL PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     cargo VARCHAR(255) NOT NULL
-)
+);
 
 CREATE TABLE venta (
     id_ven SERIAL PRIMARY KEY,
     fecha TIMESTAMP NOT NULL,
+    id_clien INT,
+    id_emp INT,
     FOREIGN KEY (id_clien) REFERENCES cliente(id_clien),
     FOREIGN KEY (id_emp) REFERENCES empleado(id_emp)
-)
+);
 
 CREATE TABLE detalle_venta (
     id_det SERIAL PRIMARY KEY,
     cantidad INT NOT NULL,
     precio_unit DECIMAL(10, 2) NOT NULL,
+    id_ven INT,
+    id_prod INT,
     FOREIGN KEY (id_ven) REFERENCES venta(id_ven),
     FOREIGN KEY (id_prod) REFERENCES producto(id_prod)
-)
+);
 
 --DML
-INSERT INTO Categoria (nombre) VALUES
+INSERT INTO categoria (nombre) VALUES
 ('Electrónica'), ('Ropa'), ('Hogar'), ('Deportes'), ('Juguetes'),
 ('Libros'), ('Belleza'), ('Automotriz'), ('Tecnología'), ('Accesorios'),
 ('Música'), ('Videojuegos'), ('Oficina'), ('Mascotas'), ('Salud'),
 ('Jardín'), ('Herramientas'), ('Calzado'), ('Muebles'), ('Iluminación'),
 ('Cocina'), ('Arte'), ('Educación'), ('Viajes'), ('Fitness');
 
-INSERT INTO Proveedor (nombre, telefono) VALUES
-('Proveedor 1','10000001'), ('Proveedor 2','10000002'),
-('Proveedor 3','10000003'), ('Proveedor 4','10000004'),
-('Proveedor 5','10000005'), ('Proveedor 6','10000006'),
-('Proveedor 7','10000007'), ('Proveedor 8','10000008'),
-('Proveedor 9','10000009'), ('Proveedor 10','10000010'),
-('Proveedor 11','10000011'), ('Proveedor 12','10000012'),
-('Proveedor 13','10000013'), ('Proveedor 14','10000014'),
-('Proveedor 15','10000015'), ('Proveedor 16','10000016'),
-('Proveedor 17','10000017'), ('Proveedor 18','10000018'),
-('Proveedor 19','10000019'), ('Proveedor 20','10000020'),
-('Proveedor 21','10000021'), ('Proveedor 22','10000022'),
-('Proveedor 23','10000023'), ('Proveedor 24','10000024'),
-('Proveedor 25','10000025');
+INSERT INTO proveedor (nombre, telefono, email) VALUES
+('Proveedor 1','10000001','prov1@mail.com'),
+('Proveedor 2','10000002','prov2@mail.com'),
+('Proveedor 3','10000003','prov3@mail.com'),
+('Proveedor 4','10000004','prov4@mail.com'),
+('Proveedor 5','10000005','prov5@mail.com'),
+('Proveedor 6','10000006','prov6@mail.com'),
+('Proveedor 7','10000007','prov7@mail.com'),
+('Proveedor 8','10000008','prov8@mail.com'),
+('Proveedor 9','10000009','prov9@mail.com'),
+('Proveedor 10','10000010','prov10@mail.com'),
+('Proveedor 11','10000011','prov11@mail.com'),
+('Proveedor 12','10000012','prov12@mail.com'),
+('Proveedor 13','10000013','prov13@mail.com'),
+('Proveedor 14','10000014','prov14@mail.com'),
+('Proveedor 15','10000015','prov15@mail.com'),
+('Proveedor 16','10000016','prov16@mail.com'),
+('Proveedor 17','10000017','prov17@mail.com'),
+('Proveedor 18','10000018','prov18@mail.com'),
+('Proveedor 19','10000019','prov19@mail.com'),
+('Proveedor 20','10000020','prov20@mail.com'),
+('Proveedor 21','10000021','prov21@mail.com'),
+('Proveedor 22','10000022','prov22@mail.com'),
+('Proveedor 23','10000023','prov23@mail.com'),
+('Proveedor 24','10000024','prov24@mail.com'),
+('Proveedor 25','10000025','prov25@mail.com');
 
-INSERT INTO Producto (nombre, precio, stock, id_cat, id_prov) VALUES
+INSERT INTO producto (nombre, precio, stock, id_cat, id_prov) VALUES
 ('Mouse',15,50,1,1), ('Teclado',25,40,1,2), ('Monitor',120,20,1,3),
 ('Camisa',20,60,2,4), ('Pantalón',30,50,2,5),
 ('Sofá',200,10,3,6), ('Mesa',150,15,3,7),
@@ -87,7 +105,7 @@ INSERT INTO Producto (nombre, precio, stock, id_cat, id_prov) VALUES
 ('Consola',500,6,12,22), ('Silla',60,20,13,23),
 ('Comida perro',25,45,14,24), ('Vitaminas',15,55,15,25);
 
-INSERT INTO Cliente (nombre, email, telefono) VALUES
+INSERT INTO cliente (nombre, email, telefono) VALUES
 ('Cliente 1','c1@mail.com','20000001'), ('Cliente 2','c2@mail.com','20000002'),
 ('Cliente 3','c3@mail.com','20000003'), ('Cliente 4','c4@mail.com','20000004'),
 ('Cliente 5','c5@mail.com','20000005'), ('Cliente 6','c6@mail.com','20000006'),
@@ -102,7 +120,7 @@ INSERT INTO Cliente (nombre, email, telefono) VALUES
 ('Cliente 23','c23@mail.com','20000023'), ('Cliente 24','c24@mail.com','20000024'),
 ('Cliente 25','c25@mail.com','20000025');
 
-INSERT INTO Empleado (nombre, cargo) VALUES
+INSERT INTO empleado (nombre, cargo) VALUES
 ('Empleado 1','Vendedor'), ('Empleado 2','Cajero'),
 ('Empleado 3','Gerente'), ('Empleado 4','Soporte'),
 ('Empleado 5','Vendedor'), ('Empleado 6','Cajero'),
@@ -117,7 +135,7 @@ INSERT INTO Empleado (nombre, cargo) VALUES
 ('Empleado 23','Gerente'), ('Empleado 24','Soporte'),
 ('Empleado 25','Vendedor');
 
-INSERT INTO Venta (fecha, id_clien, id_emp) VALUES
+INSERT INTO venta (fecha, id_clien, id_emp) VALUES
 ('2024-01-01',1,1), ('2024-01-02',2,2), ('2024-01-03',3,3),
 ('2024-01-04',4,4), ('2024-01-05',5,5),
 ('2024-01-06',6,6), ('2024-01-07',7,7),
@@ -131,7 +149,7 @@ INSERT INTO Venta (fecha, id_clien, id_emp) VALUES
 ('2024-01-22',22,22), ('2024-01-23',23,23),
 ('2024-01-24',24,24), ('2024-01-25',25,25);
 
-INSERT INTO DetalleVenta (id_ven, id_prod, cantidad, precio_unit) VALUES
+INSERT INTO detalle_venta (id_ven, id_prod, cantidad, precio_unit) VALUES
 (1,1,2,15),(2,2,1,25),(3,3,1,120),(4,4,2,20),(5,5,1,30),
 (6,6,1,200),(7,7,2,150),(8,8,3,18),(9,9,1,300),(10,10,2,25),
 (11,11,1,15),(12,12,2,10),(13,13,1,12),(14,14,1,50),(15,15,2,8),

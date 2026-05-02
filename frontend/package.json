@@ -1,0 +1,11 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "vite --host",
+    "start": "vite"
+  },
+  "dependencies": {
+    "vite": "^8.0.10"
+  }
+}
