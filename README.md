@@ -7,7 +7,7 @@
 ## Ejecución
 
 1. Clonar repositorio:
-    git clone <URL_DEL_REPO>
+    git clone https://github.com/Tiffany24630/Proyecto-2---Bases-de-Datos-1.git
     cd Proyecto-2---Bases-de-Datos-1
 
 2. Crear archivo .env basado en .env.example:
