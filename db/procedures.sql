@@ -4,7 +4,7 @@ CREATE ROLE inventario_r;
 CREATE ROLE auditor_r;
 CREATE ROLE cliente_r;
 
-GRANT * ON ALL TABLES IN SCHEMA public TO admin_r;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin_r;
 GRANT SELECT, INSERT ON venta, detalle_venta TO vendedor_r;
 GRANT SELECT, INSERT ON detalle_venta TO vendedor_r;
 GRANT SELECT ON producto TO cliente_r;

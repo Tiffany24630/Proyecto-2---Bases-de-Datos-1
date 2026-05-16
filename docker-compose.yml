@@ -1,52 +1,43 @@
-version: '3.8'
-
 services:
-
   db:
     image: postgres:15
     container_name: db
-
+    restart: always
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: empresa
     ports:
       - "5432:5432"
-
     volumes:
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./db/procedures.sql:/docker-entrypoint-initdb.d/procedures.sql
+      - ./db:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
 
   backend:
     build: ./backend
-
     container_name: backend
-
+    restart: always
     depends_on:
       - db
-
     ports:
       - "3000:3000"
-
     env_file:
       - .env
-
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
-
     container_name: frontend
-
-    depends_on:
-      - backend
-
+    restart: always
     ports:
       - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - app-network
 
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+networks:
+  app-network:
+    driver: bridge
