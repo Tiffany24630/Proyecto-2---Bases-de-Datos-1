@@ -1,12 +1,7 @@
-import pool from "../db.js";
+import { registrarVenta } from "../services/venta.service.js";
 
 export const crearVenta = async (req, res) => {
-    const { id_clien, id_prod, cantidad, precio } = req.body;
-
-    await pool.query(
-        "CALL crear_venta($1, $2, $3, $4)",
-        [id_clien, id_prod, cantidad, precio]
-    );
+    await registrarVenta(req.body);
 
     res.json({ message: "Venta creada" });
 };
