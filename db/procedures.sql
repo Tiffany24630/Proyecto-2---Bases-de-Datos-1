@@ -18,13 +18,6 @@ CREATE TABLE usuarios(
     rol VARCHAR(50) NOT NULL
 );
 
-INSERT INTO usuarios(username, password, rol) VALUES
-('admin1', 'admin2', 'admin3'),
-('vendedor1', 'vendedor2', 'vendedor3'),
-('inventario1', 'inventario2', 'inventario3'),
-('auditor1', 'auditor2', 'auditor3'),
-('cliente1', 'cliente2', 'cliente3');
-
 CREATE OR REPLACE PROCEDURE crear_producto(
     p_nombre VARCHAR,
     p_precio NUMERIC,
