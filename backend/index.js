@@ -1,15 +1,21 @@
-import dotenv from "dotenv";
-import app from "./app.js";
+import express from "express";
+import cors from "cors";
+
+import clientesRoutes from "./routes/clientes.routes.js";
+import productosRoutes from "./routes/productos.routes.js";
+import ventasRoutes from "./routes/ventas.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 
-dotenv.config();
+const app = express();
 
-const PORT = process.env.PORT || 3000;
+app.use(cors());
+app.use(express.json());
 
+app.use("/clientes", clientesRoutes);
+app.use("/productos", productosRoutes);
+app.use("/", ventasRoutes);
 app.use("/auth", authRoutes);
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+app.listen(3000, () => {
+    console.log("Servidor corriendo en puerto 3000");
 });
-
-import authRoutes from "./routes/auth.routes.js";

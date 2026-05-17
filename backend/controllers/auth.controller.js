@@ -3,7 +3,6 @@ import { generarToken } from "../utils/jwt.js";
 
 export const login = async (req, res) => {
   try {
-
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -33,8 +32,7 @@ export const login = async (req, res) => {
       username: user.username
     });
 
-  } catch (error) {
-
+  }catch (error){
     console.error(error);
 
     res.status(500).json({
