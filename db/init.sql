@@ -56,6 +56,13 @@ CREATE TABLE detalle_venta (
     FOREIGN KEY (id_prod) REFERENCES producto(id_prod)
 );
 
+CREATE TABLE usuarios(
+    id_user SERIAL PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    rol VARCHAR(50) NOT NULL
+);
+
 --Índices de venta y producto para encontrar rápidamente los productos por nombre y las ventas por fecha
 CREATE INDEX idx_producto_nombre ON producto(nombre);
 CREATE INDEX idx_venta_fecha ON venta(fecha);
