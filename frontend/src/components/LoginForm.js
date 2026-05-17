@@ -1,85 +1,56 @@
 import { loginService } from "../services/auth.service.js";
 
-export const LoginForm = () => {
-  setTimeout(() => {
-    const form = document.getElementById("login-form");
+export const LoginForm = () => `
+    <form id="loginForm">
+        <input
+            type="text"
+            id="username"
+            placeholder="Usuario"
+        />
 
-    if (!form) return;
+        <input
+            type="password"
+            id="password"
+            placeholder="Contraseña"
+        />
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+        <button type="submit">
+            Iniciar sesión
+        </button>
+    </form>
+`;
 
-      const username =
+window.addEventListener("submit", async (e) => {
+    if (e.target.id !== "loginForm") return;
+
+    e.preventDefault();
+
+    const username =
         document.getElementById("username").value;
 
-      const password =
+    const password =
         document.getElementById("password").value;
 
-      try {
+    try {
         const data = await loginService(
-          username,
-          password
+            username,
+            password
         );
 
         if (data.error) {
-          alert(data.error);
-          return;
+            alert(data.error);
+            return;
         }
 
-        localStorage.setItem(
-          "token",
-          data.token
-        );
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("rol", data.rol);
+        localStorage.setItem("username", data.username);
 
-        localStorage.setItem(
-          "rol",
-          data.rol
-        );
+        alert("Login exitoso");
+        window.location.href = "/";
 
-        localStorage.setItem(
-          "username",
-          data.username
-        );
-
-        alert(
-          `Bienvenido ${data.username} (${data.rol})`
-        );
-
-        window.location.hash = "#/dashboard";
-
-      }catch (error){
+    }catch (error){
         console.error(error);
-
-        alert("Error iniciando sesión");
-      }
-    });
-  }, 0);
-
-  return `
-    <form id="login-form">
-
-      <div>
-        <label>Usuario</label>
-        <input
-          type="text"
-          id="username"
-          required
-        />
-      </div>
-
-      <div>
-        <label>Password</label>
-        <input
-          type="password"
-          id="password"
-          required
-        />
-      </div>
-
-      <button type="submit">
-        Iniciar sesión
-      </button>
-
-    </form>
-  `;
-};
+        alert("Error login");
+    }
+});

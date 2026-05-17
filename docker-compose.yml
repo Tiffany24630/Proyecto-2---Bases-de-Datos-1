@@ -1,14 +1,20 @@
+version: "3.9"
+
 services:
+
   db:
     image: postgres:15
     container_name: db
     restart: always
+
     environment:
       POSTGRES_USER: proy3
       POSTGRES_PASSWORD: secret
-      POSTGRES_DB: empresa
+      POSTGRES_DB: tienda
+
     ports:
       - "5433:5432"
+
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ./db/procedures.sql:/docker-entrypoint-initdb.d/procedures.sql
@@ -17,19 +23,22 @@ services:
   backend:
     build: ./backend
     container_name: backend
-    restart: always
-    depends_on:
-      - db
-    env_file:
-      - .env
+
     ports:
       - "3000:3000"
+
+    depends_on:
+      - db
+
+    env_file:
+      - .env
 
   frontend:
     build: ./frontend
     container_name: frontend
-    restart: always
-    depends_on:
-      - backend
+
     ports:
       - "5173:5173"
+
+    depends_on:
+      - backend

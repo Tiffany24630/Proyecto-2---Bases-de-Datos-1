@@ -3,11 +3,12 @@ import { generarToken } from "../utils/jwt.js";
 
 export const login = async (req, res) => {
   try {
+
     const { username, password } = req.body;
 
     if (!username || !password) {
       return res.status(400).json({
-        error: "Username y password son requeridos"
+        error: "Username y password requeridos"
       });
     }
 
@@ -33,6 +34,7 @@ export const login = async (req, res) => {
     });
 
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({

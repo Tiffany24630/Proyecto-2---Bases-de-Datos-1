@@ -1,4 +1,6 @@
-export const protectedRoute = (roles = []) => {
+export const protectedRoute = (
+  roles = []
+) => {
   const token =
     localStorage.getItem("token");
 
@@ -9,17 +11,16 @@ export const protectedRoute = (roles = []) => {
     alert(
       "Debe iniciar sesión"
     );
-    window.location.hash = "#/login";
+    window.location.href =
+      "/login";
     return false;
   }
 
   if (
-    roles.length > 0 &&
+    roles.length &&
     !roles.includes(rol)
   ) {
-    alert(
-      "No tiene permisos"
-    );
+    alert("Sin permisos");
     return false;
   }
   return true;

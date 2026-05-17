@@ -1,24 +1,19 @@
 export const auth = {
-  get token() {
-    return localStorage.getItem("token");
-  },
+  token:
+    localStorage.getItem("token"),
 
-  get rol() {
-    return localStorage.getItem("rol");
-  },
+  rol:
+    localStorage.getItem("rol"),
 
-  get username() {
-    return localStorage.getItem("username");
-  },
+  username:
+    localStorage.getItem("username"),
 
   isAuth() {
-    return !!localStorage.getItem("token");
+    return !!this.token;
   },
 
   logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("rol");
-    localStorage.removeItem("username");
-    window.location.hash = "#/login";
+    localStorage.clear();
+    window.location.href = "/login";
   }
 };

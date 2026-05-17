@@ -4,8 +4,7 @@ export const generarToken = (user) => {
   return jwt.sign(
     {
       id: user.id_user,
-      rol: user.rol,
-      username: user.username
+      rol: user.rol
     },
     process.env.JWT_SECRET,
     {
