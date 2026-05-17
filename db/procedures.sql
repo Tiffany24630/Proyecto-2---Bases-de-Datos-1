@@ -44,7 +44,7 @@ LANGUAGE plpgsql AS $$
 BEGIN
     DELETE FROM producto
     WHERE id_prod = p_id;
-END;    
+END;
 $$;
 
 CREATE OR REPLACE PROCEDURE registrar_cliente(
@@ -69,29 +69,38 @@ LANGUAGE plpgsql AS $$
 DECLARE
     nueva_venta INT;
     stock_actual INT;
+
 BEGIN
-    BEGIN
-        SELECT stock INTO stock_actual FROM producto WHERE id_prod = p_prod;
 
-        IF stock_actual < p_cantidad THEN
-            RAISE EXCEPTION 'Stock insuficiente';
-        END IF;
+    SELECT stock
+    INTO stock_actual
+    FROM producto
+    WHERE id_prod = p_prod;
 
-        INSERT INTO venta(fecha, id_clien, id_emp)
-        VALUES(NOW(), p_clien, 1)
-        RETURNING id_ven INTO nueva_venta;
+    IF stock_actual < p_cant THEN
+        RAISE EXCEPTION 'Stock insuficiente';
+    END IF;
 
-        INSERT INTO detalle_venta(cantidad, precio_unit, id_ven, id_prod)
-        VALUES(p_cant, p_precio, nueva_venta, p_prod);
+    INSERT INTO venta(fecha, id_clien, id_emp)
+    VALUES(NOW(), p_clien, 1)
+    RETURNING id_ven INTO nueva_venta;
 
-        UPDATE producto
-        SET stock = stock - p_cant
-        WHERE id_prod = p_prod;
+    INSERT INTO detalle_venta(
+        cantidad,
+        precio_unit,
+        id_ven,
+        id_prod
+    )
+    VALUES(
+        p_cant,
+        p_precio,
+        nueva_venta,
+        p_prod
+    );
 
-    EXCEPTION
-        WHEN OTHERS THEN
-            RAISE;
-    END;
+    UPDATE producto
+    SET stock = stock - p_cant
+    WHERE id_prod = p_prod;
+
 END;
 $$;
-
