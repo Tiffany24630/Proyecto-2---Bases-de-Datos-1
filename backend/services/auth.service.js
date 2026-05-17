@@ -1,13 +1,17 @@
-import pool from "../db.js";
+import { apiFetch } from "./api.js";
 
-export const registrarVenta = async ({
-    id_clien,
-    id_prod,
-    cantidad,
-    precio
-}) => {
-    await pool.query(
-        "CALL crear_venta($1, $2, $3, $4)",
-        [id_clien, id_prod, cantidad, precio]
-    );
+export const loginService = async (
+  username,
+  password
+) => {
+  return await apiFetch(
+    "/auth/login",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        username,
+        password
+      })
+    }
+  );
 };

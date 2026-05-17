@@ -2,6 +2,9 @@ import express from "express";
 import pool from "./db.js";
 import cors from "cors";
 
+import { verifyToken } from "./middlewares/auth.middleware.js";
+import { requireRole } from "./middlewares/role.middleware.js";
+
 const app = express();
 
 app.use(cors({
@@ -10,364 +13,568 @@ app.use(cors({
 
 app.use(express.json());
 
-app.get("/clientes", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT *
-      FROM cliente
-      ORDER BY id_clien
-    `);
+app.get(
+  "/clientes",
+  verifyToken,
+  requireRole("admin_r", "vendedor_r"),
+  async (req, res) => {
 
-    res.json(result.rows);
+    try {
 
-  } catch (error) {
-    console.error(error);
+      const result = await pool.query(`
+        SELECT *
+        FROM cliente
+        ORDER BY id_clien
+      `);
 
-    res.status(500).json({
-      error: "Error obteniendo clientes"
-    });
-  }
-});
+      res.json(result.rows);
 
-app.post("/clientes", async (req, res) => {
-  try {
-    const { nombre, email, telefono } = req.body;
+    } catch (error) {
 
-    if (!nombre || !email || !telefono) {
-      return res.status(400).json({
-        error: "Todos los campos son requeridos"
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error obteniendo clientes"
       });
     }
-
-    await pool.query(
-      `
-      INSERT INTO cliente
-      (nombre, email, telefono)
-      VALUES ($1, $2, $3)
-      `,
-      [nombre, email, telefono]
-    );
-
-    res.json({
-      mensaje: "Cliente creado"
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      error: "Error creando cliente"
-    });
   }
-});
+);
 
-app.put("/clientes/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { nombre, email, telefono } = req.body;
+app.post(
+  "/clientes",
+  verifyToken,
+  requireRole("admin_r"),
+  async (req, res) => {
 
-    await pool.query(
-      `
-      UPDATE cliente
-      SET nombre = $1,
-          email = $2,
-          telefono = $3
-      WHERE id_clien = $4
-      `,
-      [nombre, email, telefono, id]
-    );
+    try {
 
-    res.json({
-      mensaje: "Cliente actualizado"
-    });
+      const {
+        nombre,
+        email,
+        telefono
+      } = req.body;
 
-  } catch (error) {
-    console.error(error);
+      if (!nombre || !email || !telefono) {
+        return res.status(400).json({
+          error: "Todos los campos son requeridos"
+        });
+      }
 
-    res.status(500).json({
-      error: "Error actualizando cliente"
-    });
-  }
-});
-
-app.delete("/clientes/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    await pool.query(
-      `
-      DELETE FROM cliente
-      WHERE id_clien = $1
-      `,
-      [id]
-    );
-
-    res.json({
-      mensaje: "Cliente eliminado"
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      error: "Error eliminando cliente"
-    });
-  }
-});
-
-app.get("/productos", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT *
-      FROM producto
-      ORDER BY id_prod
-    `);
-
-    res.json(result.rows);
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      error: "Error obteniendo productos"
-    });
-  }
-});
-
-app.post("/productos", async (req, res) => {
-  try {
-    const { nombre, precio } = req.body;
-
-    await pool.query(
-      `
-      INSERT INTO producto
-      (nombre, precio, stock, id_prov, id_cat)
-      VALUES ($1, $2, 0, 1, 1)
-      `,
-      [nombre, precio]
-    );
-
-    res.json({
-      mensaje: "Producto creado"
-    });
-
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      error: "Error creando producto"
-    });
-  }
-});
-
-app.post("/venta", async (req, res) => {
-  const client = await pool.connect();
-
-  try {
-    const { detalles, id_clien } = req.body;
-
-    if (!detalles || detalles.length === 0) {
-      return res.status(400).json({
-        error: "Debe agregar productos"
-      });
-    }
-
-    await client.query("BEGIN");
-
-    const venta = await client.query(
-      `
-      INSERT INTO venta
-      (fecha, id_clien, id_emp)
-      VALUES (NOW(), $1, 1)
-      RETURNING id_ven
-      `,
-      [id_clien]
-    );
-
-    const idVenta = venta.rows[0].id_ven;
-
-    for (const d of detalles) {
-
-      const producto = await client.query(
+      await pool.query(
         `
-        SELECT stock
-        FROM producto
-        WHERE id_prod = $1
+        CALL registrar_cliente($1, $2, $3)
         `,
-        [d.id_prod]
+        [nombre, telefono, email]
       );
 
-      if (producto.rows.length === 0) {
-        throw new Error("Producto no encontrado");
-      }
+      res.json({
+        mensaje: "Cliente creado"
+      });
 
-      const stock = producto.rows[0].stock;
+    } catch (error) {
 
-      if (stock < d.cantidad) {
-        throw new Error(
-          `Stock insuficiente para producto ${d.id_prod}`
-        );
-      }
+      console.error(error);
 
-      await client.query(
+      res.status(500).json({
+        error: "Error creando cliente"
+      });
+    }
+  }
+);
+
+app.put(
+  "/clientes/:id",
+  verifyToken,
+  requireRole("admin_r"),
+  async (req, res) => {
+
+    try {
+
+      const { id } = req.params;
+
+      const {
+        nombre,
+        email,
+        telefono
+      } = req.body;
+
+      await pool.query(
         `
-        INSERT INTO detalle_venta
-        (cantidad, precio_unit, id_ven, id_prod)
-        VALUES ($1, $2, $3, $4)
+        UPDATE cliente
+        SET nombre = $1,
+            email = $2,
+            telefono = $3
+        WHERE id_clien = $4
+        `,
+        [nombre, email, telefono, id]
+      );
+
+      res.json({
+        mensaje: "Cliente actualizado"
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error actualizando cliente"
+      });
+    }
+  }
+);
+
+app.delete(
+  "/clientes/:id",
+  verifyToken,
+  requireRole("admin_r"),
+  async (req, res) => {
+
+    try {
+
+      const { id } = req.params;
+
+      await pool.query(
+        `
+        DELETE FROM cliente
+        WHERE id_clien = $1
+        `,
+        [id]
+      );
+
+      res.json({
+        mensaje: "Cliente eliminado"
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error eliminando cliente"
+      });
+    }
+  }
+);
+
+app.get(
+  "/productos",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "inventario_r",
+    "cliente_r",
+    "vendedor_r"
+  ),
+  async (req, res) => {
+
+    try {
+
+      const result = await pool.query(`
+        SELECT *
+        FROM producto
+        ORDER BY id_prod
+      `);
+
+      res.json(result.rows);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error obteniendo productos"
+      });
+    }
+  }
+);
+
+app.post(
+  "/productos",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "inventario_r"
+  ),
+  async (req, res) => {
+
+    try {
+
+      const {
+        nombre,
+        precio,
+        stock,
+        id_prov,
+        id_cat
+      } = req.body;
+
+      await pool.query(
+        `
+        CALL crear_producto($1, $2, $3, $4, $5)
         `,
         [
-          d.cantidad,
-          d.precio,
-          idVenta,
-          d.id_prod
+          nombre,
+          precio,
+          stock,
+          id_prov,
+          id_cat
         ]
       );
 
-      await client.query(
-        `
-        UPDATE producto
-        SET stock = stock - $1
-        WHERE id_prod = $2
-        `,
-        [d.cantidad, d.id_prod]
-      );
+      res.json({
+        mensaje: "Producto creado"
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error creando producto"
+      });
     }
-
-    await client.query("COMMIT");
-
-    res.json({
-      mensaje: "Venta creada",
-      idVenta
-    });
-
-  } catch (error) {
-
-    await client.query("ROLLBACK");
-
-    console.error(error);
-
-    res.status(500).json({
-      error: error.message
-    });
-
-  } finally {
-    client.release();
   }
-});
+);
 
-app.get("/reporte-ventas", async (req, res) => {
-  try {
+app.put(
+  "/productos/:id/stock",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "inventario_r"
+  ),
+  async (req, res) => {
 
-    const result = await pool.query(`
-      SELECT
-        v.id_ven,
-        v.fecha,
-        c.nombre AS cliente,
-        SUM(dv.cantidad * dv.precio_unit) AS total
-      FROM venta v
-      JOIN cliente c
-        ON v.id_clien = c.id_clien
-      JOIN detalle_venta dv
-        ON v.id_ven = dv.id_ven
-      GROUP BY
-        v.id_ven,
-        v.fecha,
-        c.nombre
-      ORDER BY v.fecha DESC
-    `);
+    try {
 
-    res.json(result.rows);
+      const { id } = req.params;
 
-  } catch (error) {
+      const { stock } = req.body;
 
-    console.error(error);
+      await pool.query(
+        `
+        CALL actualizar_stock($1, $2)
+        `,
+        [id, stock]
+      );
 
-    res.status(500).json({
-      error: "Error obteniendo reporte"
-    });
+      res.json({
+        mensaje: "Stock actualizado"
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error actualizando stock"
+      });
+    }
   }
-});
+);
 
-app.get("/reporte-subquery", async (req, res) => {
-  try {
+app.delete(
+  "/productos/:id",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "inventario_r"
+  ),
+  async (req, res) => {
 
-    const result = await pool.query(`
-      SELECT
-        nombre,
-        precio
-      FROM producto
-      WHERE precio >
-      (
-        SELECT AVG(precio)
-        FROM producto
-      )
-    `);
+    try {
 
-    res.json(result.rows);
+      const { id } = req.params;
 
-  } catch (error) {
+      await pool.query(
+        `
+        CALL eliminar_producto($1)
+        `,
+        [id]
+      );
 
-    console.error(error);
+      res.json({
+        mensaje: "Producto eliminado"
+      });
 
-    res.status(500).json({
-      error: "Error subquery"
-    });
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error eliminando producto"
+      });
+    }
   }
-});
+);
 
-app.get("/reporte-cte", async (req, res) => {
-  try {
+app.post(
+  "/venta",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "vendedor_r"
+  ),
+  async (req, res) => {
 
-    const result = await pool.query(`
-      WITH ventas_totales AS (
+    const client = await pool.connect();
+
+    try {
+
+      const {
+        detalles,
+        id_clien
+      } = req.body;
+
+      if (!detalles || detalles.length === 0) {
+        return res.status(400).json({
+          error: "Debe agregar productos"
+        });
+      }
+
+      await client.query("BEGIN");
+
+      const venta = await client.query(
+        `
+        INSERT INTO venta
+        (fecha, id_clien, id_emp)
+        VALUES (NOW(), $1, 1)
+        RETURNING id_ven
+        `,
+        [id_clien]
+      );
+
+      const idVenta = venta.rows[0].id_ven;
+
+      for (const d of detalles) {
+
+        const producto = await client.query(
+          `
+          SELECT stock
+          FROM producto
+          WHERE id_prod = $1
+          `,
+          [d.id_prod]
+        );
+
+        if (producto.rows.length === 0) {
+          throw new Error("Producto no encontrado");
+        }
+
+        const stock = producto.rows[0].stock;
+
+        if (stock < d.cantidad) {
+          throw new Error(
+            `Stock insuficiente para producto ${d.id_prod}`
+          );
+        }
+
+        await client.query(
+          `
+          INSERT INTO detalle_venta
+          (
+            cantidad,
+            precio_unit,
+            id_ven,
+            id_prod
+          )
+          VALUES ($1, $2, $3, $4)
+          `,
+          [
+            d.cantidad,
+            d.precio,
+            idVenta,
+            d.id_prod
+          ]
+        );
+
+        await client.query(
+          `
+          UPDATE producto
+          SET stock = stock - $1
+          WHERE id_prod = $2
+          `,
+          [d.cantidad, d.id_prod]
+        );
+      }
+
+      await client.query("COMMIT");
+
+      res.json({
+        mensaje: "Venta creada",
+        idVenta
+      });
+
+    } catch (error) {
+
+      await client.query("ROLLBACK");
+
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message
+      });
+
+    } finally {
+
+      client.release();
+    }
+  }
+);
+
+app.get(
+  "/reporte-ventas",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  async (req, res) => {
+
+    try {
+
+      const result = await pool.query(`
         SELECT
-          v.id_clien,
-          SUM(dv.cantidad * dv.precio_unit) AS total_gastado
+          v.id_ven,
+          v.fecha,
+          c.nombre AS cliente,
+          SUM(
+            dv.cantidad * dv.precio_unit
+          ) AS total
         FROM venta v
+        JOIN cliente c
+          ON v.id_clien = c.id_clien
         JOIN detalle_venta dv
           ON v.id_ven = dv.id_ven
-        GROUP BY v.id_clien
-      )
+        GROUP BY
+          v.id_ven,
+          v.fecha,
+          c.nombre
+        ORDER BY v.fecha DESC
+      `);
 
-      SELECT
-        c.nombre,
-        vt.total_gastado
-      FROM ventas_totales vt
-      JOIN cliente c
-        ON vt.id_clien = c.id_clien
-    `);
+      res.json(result.rows);
 
-    res.json(result.rows);
+    } catch (error) {
 
-  } catch (error) {
+      console.error(error);
 
-    console.error(error);
-
-    res.status(500).json({
-      error: "Error CTE"
-    });
+      res.status(500).json({
+        error: "Error obteniendo reporte"
+      });
+    }
   }
-});
+);
 
-app.get("/vista-ventas", async (req, res) => {
-  try {
+app.get(
+  "/reporte-subquery",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  async (req, res) => {
 
-    const result = await pool.query(`
-      SELECT *
-      FROM vista_ventas
-    `);
+    try {
 
-    res.json(result.rows);
+      const result = await pool.query(`
+        SELECT
+          nombre,
+          precio
+        FROM producto
+        WHERE precio >
+        (
+          SELECT AVG(precio)
+          FROM producto
+        )
+      `);
 
-  } catch (error) {
+      res.json(result.rows);
 
-    console.error(error);
+    } catch (error) {
 
-    res.status(500).json({
-      error: "Error vista"
-    });
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error subquery"
+      });
+    }
   }
-});
+);
+
+app.get(
+  "/reporte-cte",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  async (req, res) => {
+
+    try {
+
+      const result = await pool.query(`
+        WITH ventas_totales AS (
+          SELECT
+            v.id_clien,
+            SUM(
+              dv.cantidad * dv.precio_unit
+            ) AS total_gastado
+          FROM venta v
+          JOIN detalle_venta dv
+            ON v.id_ven = dv.id_ven
+          GROUP BY v.id_clien
+        )
+
+        SELECT
+          c.nombre,
+          vt.total_gastado
+        FROM ventas_totales vt
+        JOIN cliente c
+          ON vt.id_clien = c.id_clien
+      `);
+
+      res.json(result.rows);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error CTE"
+      });
+    }
+  }
+);
+
+app.get(
+  "/vista-ventas",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  async (req, res) => {
+
+    try {
+
+      const result = await pool.query(`
+        SELECT *
+        FROM vista_ventas
+      `);
+
+      res.json(result.rows);
+
+    } catch (error) {
+
+      console.error(error);
+
+      res.status(500).json({
+        error: "Error vista"
+      });
+    }
+  }
+);
 
 app.get("/", (req, res) => {
   res.json({

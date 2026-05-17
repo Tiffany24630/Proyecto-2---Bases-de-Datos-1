@@ -1,16 +1,26 @@
 export const protectedRoute = (roles = []) => {
-    const token = localStorage.getItem("token");
-    const rol = localStorage.getItem("rol");
+  const token =
+    localStorage.getItem("token");
 
-    if (!token) {
-        alert("Debe iniciar sesión para acceder a esta página");
-        return false;
-    }
+  const rol =
+    localStorage.getItem("rol");
 
-    if (roles.length && !roles.includes(rol)){
-        alert("Sin permisos")
-        return false;
-    }
+  if (!token) {
+    alert(
+      "Debe iniciar sesión"
+    );
+    window.location.hash = "#/login";
+    return false;
+  }
 
-    return true;
+  if (
+    roles.length > 0 &&
+    !roles.includes(rol)
+  ) {
+    alert(
+      "No tiene permisos"
+    );
+    return false;
+  }
+  return true;
 };

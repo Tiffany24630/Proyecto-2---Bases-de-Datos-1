@@ -1,8 +1,24 @@
 export const auth = {
-    token: localStorage.getItem("token"),
-    rol: localStorage.getItem("rol"),
+  get token() {
+    return localStorage.getItem("token");
+  },
 
-    isAuth() {
-        return !!this.token;
-    }
+  get rol() {
+    return localStorage.getItem("rol");
+  },
+
+  get username() {
+    return localStorage.getItem("username");
+  },
+
+  isAuth() {
+    return !!localStorage.getItem("token");
+  },
+
+  logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("rol");
+    localStorage.removeItem("username");
+    window.location.hash = "#/login";
+  }
 };

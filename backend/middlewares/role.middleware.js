@@ -1,9 +1,17 @@
 export const requireRole = (...roles) => {
-    return (req, res, next) => {
-        if (!roles.includes(req.user.rol)){
-            return res.status(403).json({ error: "Access denied" });
-        }
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        error: "No autenticado"
+      });
+    }
 
-        next();
-    };
+    if (!roles.includes(req.user.rol)) {
+      return res.status(403).json({
+        error: "No tiene permisos"
+      });
+    }
+
+    next();
+  };
 };

@@ -1,18 +1,35 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import { LoginPage } from "../pages/LoginPage.js";
+import { DashboardPage } from "../pages/DashboardPage.js";
 
-dotenv.config();
+const app = document.getElementById("app");
 
-const app = express();
+const routes = {
+  "#/login": LoginPage,
+  "#/dashboard": DashboardPage
+};
 
-app.use(cors());
-app.use(express.json());
+export const router = () => {
+  const hash =
+    window.location.hash || "#/login";
 
-app.get("/", (req, res) => {
-  res.json({ ok: true });
-});
+  const page =
+    routes[hash];
 
-app.listen(3000, "0.0.0.0", () => {
-  console.log("Servidor corriendo en puerto 3000");
-});
+  if (page) {
+    app.innerHTML = page();
+  } else {
+    app.innerHTML = `
+      <h1>404</h1>
+    `;
+  }
+};
+
+window.addEventListener(
+  "load",
+  router
+);
+
+window.addEventListener(
+  "hashchange",
+  router
+);

@@ -99,8 +99,8 @@ INSERT INTO detalle_venta (id_ven, id_prod, cantidad, precio_unit) VALUES
 (21,21,1,150),(22,22,1,500),(23,23,2,60),(24,24,3,25),(25,25,2,15);
 
 INSERT INTO usuarios(username, password, rol) VALUES
-('admin1', 'admin2', 'admin3'),
-('vendedor1', 'vendedor2', 'vendedor3'),
-('inventario1', 'inventario2', 'inventario3'),
-('auditor1', 'auditor2', 'auditor3'),
-('cliente1', 'cliente2', 'cliente3');
+('admin1', '1234', 'admin_r'),
+('vendedor1', '1234', 'vendedor_r'),
+('inventario1', '1234', 'inventario_r'),
+('auditor1', '1234', 'auditor_r'),
+('cliente1', '1234', 'cliente_r');

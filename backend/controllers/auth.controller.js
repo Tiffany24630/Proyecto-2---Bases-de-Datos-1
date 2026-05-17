@@ -1,27 +1,42 @@
-import jwt from "jsonwebtoken";
-import { User } from "../models/user.model.js";
+import User from "../models/user.js";
+import { generarToken } from "../utils/jwt.js";
 
 export const login = async (req, res) => {
+  try {
     const { username, password } = req.body;
 
-    const user = await User.findOne({ where: { username, password } });
-
-    if (!user){
-        return res.status(401).json({ error: "Invalid credentials" });
+    if (!username || !password) {
+      return res.status(400).json({
+        error: "Username y password son requeridos"
+      });
     }
 
-    const token = jwt.sign(
-        {
-            id: user.id_user,
-            rol: user.rol
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "8h" }
-    );
-
-    res.json({ 
-        token, 
-        rol: user.rol,
-        username: user.username
+    const user = await User.findOne({
+      where: {
+        username,
+        password
+      }
     });
+
+    if (!user) {
+      return res.status(401).json({
+        error: "Credenciales inválidas"
+      });
+    }
+
+    const token = generarToken(user);
+
+    res.json({
+      token,
+      rol: user.rol,
+      username: user.username
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      error: "Error en login"
+    });
+  }
 };
