@@ -1,16 +1,17 @@
-CREATE ROLE admin_r;
-CREATE ROLE vendedor_r;
-CREATE ROLE inventario_r;
-CREATE ROLE auditor_r;
-CREATE ROLE cliente_r;
+CREATE ROLE admin_r; <-- Rol para el administrador con todos los privilegios -->
+CREATE ROLE vendedor_r; <-- Rol para el vendedor con privilegios de lectura y escritura en ventas y detalles de venta -->
+CREATE ROLE inventario_r; <-- Rol para el encargado de inventario con privilegios de lectura y escritura en productos -->
+CREATE ROLE auditor_r; <-- Rol para el auditor con privilegios de lectura en productos, ventas y detalles de venta -->
+CREATE ROLE cliente_r; <-- Rol para el cliente con privilegios de lectura en productos -->
 
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin_r;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO admin_r; 
 GRANT SELECT, INSERT ON venta TO vendedor_r;
 GRANT SELECT, INSERT ON detalle_venta TO vendedor_r;
 GRANT SELECT ON producto TO cliente_r;
 GRANT SELECT ON venta TO auditor_r;
 GRANT SELECT ON detalle_venta TO auditor_r;
 
+<-- Procedimientos almacenados para operaciones comunes -->
 CREATE OR REPLACE PROCEDURE crear_producto(
     p_nombre VARCHAR,
     p_precio NUMERIC,
@@ -25,6 +26,7 @@ BEGIN
 END;
 $$;
 
+<-- Procedimiento para actualizar el stock de un producto -->
 CREATE OR REPLACE PROCEDURE actualizar_stock(
     p_id INT,
     p_stock INT
@@ -37,6 +39,7 @@ BEGIN
 END;
 $$;
 
+<-- Procedimiento para eliminar un producto -->
 CREATE OR REPLACE PROCEDURE eliminar_producto(
     p_id INT
 )
@@ -47,6 +50,7 @@ BEGIN
 END;
 $$;
 
+<-- Procedimiento para registrar un nuevo cliente -->
 CREATE OR REPLACE PROCEDURE registrar_cliente(
     p_nombre VARCHAR,
     p_telefono VARCHAR,
@@ -59,6 +63,7 @@ BEGIN
 END;
 $$;
 
+<-- Procedimiento para crear una nueva venta -->
 CREATE OR REPLACE PROCEDURE crear_venta(
     p_clien INT,
     p_prod INT,
