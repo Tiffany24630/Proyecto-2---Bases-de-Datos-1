@@ -28,6 +28,8 @@ export const actualizarStockProducto = async (id, stock) => {
     );
 };
 
+export const actualizarStockService = actualizarStockProducto;
+
 export const eliminarProducto = async (id) => {
     return await apiFetch(
         `/productos/${id}`,

@@ -59,7 +59,10 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{Number(v.total).toFixed(2)}
+                                            Q{v.total
+                                                ? parseFloat(v.total).toFixed(2)
+                                                : "0.00"
+                                            }
                                         </td>
                                     </tr>
                                 ))
@@ -90,7 +93,10 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{Number(p.precio).toFixed(2)}
+                                            Q{p.total
+                                                ? parseFloat(p.total).toFixed(2)
+                                                : "0.00"
+                                            }
                                         </td>
                                     </tr>
                                 ))
@@ -121,7 +127,10 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{Number(c.total_gastado).toFixed(2)}
+                                            Q{c.total
+                                                ? parseFloat(c.total).toFixed(2)
+                                                : "0.00"
+                                            }
                                         </td>
                                     </tr>
                                 ))
@@ -152,7 +161,10 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{Number(v.total).toFixed(2)}
+                                            Q{v.total
+                                                ? parseFloat(v.total).toFixed(2)
+                                                : "0.00"
+                                            }
                                         </td>
                                     </tr>
                                 ))
