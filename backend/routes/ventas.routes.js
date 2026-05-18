@@ -1,112 +1,59 @@
 import express from "express";
+import {crearVenta, reporteVentas, reporteSubquery, reporteCTE, vistaVentas} from "../controllers/ventas.controller.js";
+import {verifyToken} from "../middlewares/auth.middleware.js";
+import {requireRole} from "../middlewares/role.middleware.js";
 
-import {
-    crearVenta
-} from "../controllers/venta.controller.js";
+const router =
+  express.Router();
 
-import pool from "../db.js";
+router.post(
+  "/venta",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "vendedor_r"
+  ),
+  crearVenta
+);
 
-const router = express.Router();
+router.get(
+  "/reporte-ventas",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  reporteVentas
+);
 
-router.post("/venta", crearVenta);
+router.get(
+  "/reporte-subquery",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  reporteSubquery
+);
 
-router.get("/reporte-ventas", async (req, res) => {
-    try{
-        const result = await pool.query(`
-            SELECT
-                v.id_ven,
-                v.fecha,
-                c.nombre AS cliente,
-                p.nombre AS producto,
-                dv.cantidad,
-                dv.precio_unit
-            FROM ventas v
-            JOIN clientes c
-                ON v.id_clien = c.id_clien
-            JOIN detalle_venta dv
-                ON v.id_ven = dv.id_ven
-            JOIN productos p
-                ON dv.id_prod = p.id_prod
-            ORDER BY v.id_ven DESC
-        `);
+router.get(
+  "/reporte-cte",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  reporteCTE
+);
 
-        res.json(result.rows);
-
-    }catch(error){
-        console.error(error);
-
-        res.status(500).json({
-            error: "Error obteniendo reporte"
-        });
-    }
-});
-
-router.get("/reporte-subquery", async (req, res) => {
-    try{
-        const result = await pool.query(`
-            SELECT
-                c.nombre,
-                (
-                    SELECT COUNT(*)
-                    FROM ventas v
-                    WHERE v.id_clien = c.id_clien
-                ) AS total_ventas
-            FROM clientes c
-        `);
-
-        res.json(result.rows);
-
-    }catch(error){
-        console.error(error);
-
-        res.status(500).json({
-            error: "Error subquery"
-        });
-    }
-});
-
-router.get("/reporte-cte", async (req, res) => {
-    try{
-        const result = await pool.query(`
-            WITH total_clientes AS (
-                SELECT
-                    c.nombre,
-                    COUNT(v.id_ven) AS total
-                FROM clientes c
-                LEFT JOIN ventas v
-                    ON c.id_clien = v.id_clien
-                GROUP BY c.nombre
-            )
-
-            SELECT * FROM total_clientes
-        `);
-
-        res.json(result.rows);
-
-    }catch(error){
-        console.error(error);
-
-        res.status(500).json({
-            error: "Error CTE"
-        });
-    }
-});
-
-router.get("/vista-ventas", async (req, res) => {
-    try{
-        const result = await pool.query(`
-            SELECT * FROM vista_ventas
-        `);
-
-        res.json(result.rows);
-
-    }catch(error){
-        console.error(error);
-
-        res.status(500).json({
-            error: "Error vista"
-        });
-    }
-});
+router.get(
+  "/vista-ventas",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "auditor_r"
+  ),
+  vistaVentas
+);
 
 export default router;
