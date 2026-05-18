@@ -1,62 +1,36 @@
 import React, {useEffect, useState} from "react";
 import { Navbar } from "../components/Navbar.jsx";
-import { apiFetch } from "../services/api.js";
+import {obtenerProductos, actualizarStockProducto, eliminarProducto} from "../services/producto.service.js";
 
 export const ProductosPage = () => {
     const [productos, setProductos] = useState([]);
-
-    const [form, setForm] =
-        useState({
-            nombre:"",
-            precio:"",
-            stock:"",
-            id_prov:"",
-            id_cat:""
-        });
-
-    const cargar = async () => {
-        const data = await apiFetch("/productos");
-        setProductos(data);
-    };
 
     useEffect(() => {
         cargar();
     }, []);
 
-    const crearProducto = async () => {
-        await apiFetch(
-            "/productos",
-            {
-                method:"POST",
-                body:JSON.stringify(form)
-            }
+    const cargar = async () => {
+        const data = await obtenerProductos();
+        setProductos(data);
+    };
+
+    const cambiarStock = async (id, stockActual, cambio) => {
+        const nuevoStock = stockActual + cambio;
+
+        if (nuevoStock < 0) return;
+
+        await actualizarStockProducto(
+            id,
+            nuevoStock
         );
 
         cargar();
     };
 
-    const eliminarProducto = async (id) => {
-        await apiFetch(
-            `/productos/${id}`,
-            {
-                method:"DELETE"
-            }
-        );
+    const eliminar = async (id) => {
+        if (!confirm("¿Eliminar producto?")) return;
 
-        cargar();
-    };
-
-    const actualizarStock = async (id, stock) => {
-        await apiFetch(
-            `/productos/${id}/stock`,
-            {
-                method:"PUT",
-                body:JSON.stringify({
-                    stock
-                })
-            }
-        );
-
+        await eliminarProducto(id);
         cargar();
     };
 
@@ -64,80 +38,18 @@ export const ProductosPage = () => {
         <div>
             <Navbar />
             <div className="page">
-                <h1>Productos</h1>
-                <div className="card">
-                    <h2>
-                        Nuevo Producto
-                    </h2>
-
-                    <div className="form-grid">
-                        <input
-                            placeholder="Nombre"
-                            value={form.nombre}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    nombre:e.target.value
-                                })
-                            }
-                        />
-
-                        <input
-                            placeholder="Precio"
-                            value={form.precio}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    precio:e.target.value
-                                })
-                            }
-                        />
-
-                        <input
-                            placeholder="Stock"
-                            value={form.stock}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    stock:e.target.value
-                                })
-                            }
-                        />
-
-                        <input
-                            placeholder="Proveedor ID"
-                            value={form.id_prov}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    id_prov:e.target.value
-                                })
-                            }
-                        />
-
-                        <input
-                            placeholder="Categoría ID"
-                            value={form.id_cat}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    id_cat:e.target.value
-                                })
-                            }
-                        />
-                    </div>
-
-                    <button onClick={crearProducto}>
-                        Crear Producto
-                    </button>
-                </div>
+                <h1>
+                    Productos
+                </h1>
 
                 <div className="card">
-                    <table>
+                    <table className="styled-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
+                                <th>Proveedor</th>
+                                <th>Categoría</th>
                                 <th>Precio</th>
                                 <th>Stock</th>
                                 <th>Acciones</th>
@@ -148,37 +60,66 @@ export const ProductosPage = () => {
                             {
                                 productos.map(p => (
                                     <tr key={p.id_prod}>
-                                        <td>{p.id_prod}</td>
-                                        <td>{p.nombre}</td>
-                                        <td>{p.precio}</td>
-                                        <td>{p.stock}</td>
                                         <td>
-                                            <div className="actions">
-                                                <button
-                                                    className="btn-secondary"
-                                                    onClick={() =>
-                                                        actualizarStock(
-                                                            p.id_prod,
-                                                            Number(
-                                                                p.stock
-                                                            ) + 1
-                                                        )
-                                                    }
-                                                >
-                                                    +1 Stock
-                                                </button>
+                                            {p.id_prod}
+                                        </td>
 
-                                                <button
-                                                    className="btn-danger"
-                                                    onClick={() =>
-                                                        eliminarProducto(
-                                                            p.id_prod
-                                                        )
-                                                    }
-                                                >
-                                                    Eliminar
-                                                </button>
-                                            </div>
+                                        <td>
+                                            {p.nombre}
+                                        </td>
+
+                                        <td>
+                                            {p.proveedor}
+                                        </td>
+
+                                        <td>
+                                            {p.categoria}
+                                        </td>
+
+                                        <td>
+                                            Q{p.precio}
+                                        </td>
+
+                                        <td>
+                                            {p.stock}
+                                        </td>
+
+                                        <td
+                                            className="actions"
+                                        >
+                                            <button
+                                                className="danger-btn"
+                                                onClick={() =>
+                                                    cambiarStock(
+                                                        p.id_prod,
+                                                        p.stock,
+                                                        -1
+                                                    )
+                                                }
+                                            >
+                                                -1
+                                            </button>
+
+                                            <button
+                                                className="success-btn"
+                                                onClick={() =>
+                                                    cambiarStock(
+                                                        p.id_prod,
+                                                        p.stock,
+                                                        1
+                                                    )
+                                                }
+                                            >
+                                                +1
+                                            </button>
+
+                                            <button
+                                                className="danger-btn"
+                                                onClick={() => eliminar(p.id_prod)
+                                                }
+                                            >
+                                                Eliminar
+                                            </button>
                                         </td>
                                     </tr>
                                 ))

@@ -3,9 +3,19 @@ import pool from "../db.js";
 export const getProductos = async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT *
-      FROM producto
-      ORDER BY id_prod
+      SELECT
+        p.id_prod,
+        p.nombre,
+        p.precio,
+        p.stock,
+        c.nombre AS categoria,
+        pr.nombre AS proveedor
+      FROM producto p
+      JOIN categoria c
+        ON p.id_cat = c.id_cat
+      JOIN proveedor pr
+        ON p.id_prov = pr.id_prov
+      ORDER BY p.id_prod
     `);
 
     return res.json(
@@ -36,13 +46,7 @@ export const createProducto = async (req, res) => {
         $5
       )
       `,
-      [
-        nombre,
-        precio,
-        stock,
-        id_prov,
-        id_cat
-      ]
+      [nombre, precio, stock, id_prov, id_cat]
     );
 
     return res.json({
@@ -62,11 +66,8 @@ export const createProducto = async (req, res) => {
 
 export const updateStockProducto = async (req, res) => {
   try {
-    const { id } =
-      req.params;
-
-    const { stock } =
-      req.body;
+    const { id } = req.params;
+    const { stock } = req.body;
 
     await pool.query(
       `
@@ -95,8 +96,7 @@ export const updateStockProducto = async (req, res) => {
 
 export const deleteProducto = async (req, res) => {
   try {
-    const { id } =
-      req.params;
+    const { id } = req.params;
 
     await pool.query(
       `

@@ -9,134 +9,157 @@ export const ReportesPage = () => {
     const [vista, setVista] = useState([]);
 
     useEffect(() => {
-        const cargar = async () => {
-            const dataVentas = await apiFetch("/reporte-ventas");
-            const dataSubquery = await apiFetch("/reporte-subquery");
-            const dataCTE = await apiFetch("/reporte-cte");
-            const dataVista = await apiFetch("/vista-ventas");
-
-            setVentas(dataVentas);
-            setSubquery(dataSubquery);
-            setCte(dataCTE);
-            setVista(dataVista);
-        };
-        cargar();
+        cargarTodo();
     }, []);
+
+    const cargarTodo = async () => {
+        const ventasData = await apiFetch("/reporte-ventas");
+        const subqueryData = await apiFetch("/reporte-subquery");
+        const cteData = await apiFetch("/reporte-cte");
+        const vistaData = await apiFetch("/vista-ventas");
+
+        setVentas(ventasData);
+        setSubquery(subqueryData);
+        setCte(cteData);
+        setVista(vistaData);
+    };
 
     return (
         <div>
             <Navbar />
             <div className="page">
-                <h1>Reportes</h1>
-                <h2>
-                    Reporte Ventas
-                </h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID Venta</th>
-                            <th>Cliente</th>
-                            <th>Total</th>
-                        </tr>
-                    </thead>
+                <h1>
+                    Reportes
+                </h1>
 
-                    <tbody>
-                        {
-                            ventas.map(v => (
-                                <tr key={v.id_ven}>
-                                    <td>{v.id_ven}</td>
-                                    <td>{v.cliente}</td>
-                                    <td>{v.total}</td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </table>
+                <div className="card">
+                    <h2>
+                        Reporte Ventas
+                    </h2>
 
-                <h2>
-                    Productos arriba del promedio
-                </h2>
+                    <table className="styled-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Precio</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {
-                            subquery.map((p, i) => (
-                                <tr key={i}>
-                                    <td>{p.nombre}</td>
-                                    <td>{p.precio}</td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </table>
-
-                <h2>
-                    Clientes y total gastado
-                </h2>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Cliente</th>
-                            <th>Total Gastado</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {
-                            cte.map((c, i) => (
-                                <tr key={i}>
-                                    <td>{c.nombre}</td>
-                                    <td>{c.total_gastado}</td>
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </table>
-
-                <h2>
-                    Vista Ventas
-                </h2>
-
-                <table>
-                    <thead>
-                        <tr>
+                        <tbody>
                             {
-                                vista.length > 0 &&
-                                Object.keys(vista[0]).map(k => (
-                                    <th key={k}>
-                                        {k}
-                                    </th>
+                                ventas.map(v => (
+                                    <tr key={v.id_ven}>
+                                        <td>
+                                            {v.id_ven}
+                                        </td>
+
+                                        <td>
+                                            {v.cliente}
+                                        </td>
+
+                                        <td>
+                                            Q{v.total}
+                                        </td>
+                                    </tr>
                                 ))
                             }
-                        </tr>
-                    </thead>
+                        </tbody>
+                    </table>
+                </div>
 
-                    <tbody>
-                        {
-                            vista.map((v, i) => (
-                                <tr key={i}>
-                                    {
-                                        Object.values(v).map(
-                                            (value, j) => (
-                                                <td key={j}>
-                                                    {value}
-                                                </td>
-                                            )
-                                        )
-                                    }
-                                </tr>
-                            ))
-                        }
-                    </tbody>
-                </table>
+                <div className="card">
+                    <h2>
+                        Productos arriba del promedio
+                    </h2>
+
+                    <table className="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {
+                                subquery.map((p, i) => (
+                                    <tr key={i}>
+                                        <td>
+                                            {p.nombre}
+                                        </td>
+
+                                        <td>
+                                            Q{p.precio}
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="card">
+                    <h2>
+                        CTE Clientes
+                    </h2>
+
+                    <table className="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Total Gastado</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {
+                                cte.map((c, i) => (
+                                    <tr key={i}>
+                                        <td>
+                                            {c.nombre}
+                                        </td>
+
+                                        <td>
+                                            Q{c.total_gastado}
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="card">
+                    <h2>
+                        Vista Ventas
+                    </h2>
+
+                    <table className="styled-table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {
+                                vista.map((v, i) => (
+                                    <tr key={i}>
+                                        <td>
+                                            {v.cliente}
+                                        </td>
+
+                                        <td>
+                                            Q{v.total}
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     );

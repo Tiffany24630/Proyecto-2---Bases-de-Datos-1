@@ -1,52 +1,40 @@
 import React, {useEffect, useState} from "react";
 import { Navbar } from "../components/Navbar.jsx";
-import { apiFetch } from "../services/api.js";
+import {obtenerClientes, actualizarCliente} from "../services/cliente.service.js";
 
 export const ClientesPage = () => {
     const [clientes, setClientes] = useState([]);
+    const [editando, setEditando] = useState(null);
 
     const [form, setForm] =
         useState({
-            nombre:"",
-            email:"",
-            telefono:""
+            nombre: "",
+            email: "",
+            telefono: ""
         });
-
-    const cargar = async () => {
-        const data = await apiFetch("/clientes");
-        setClientes(data);
-    };
 
     useEffect(() => {
         cargar();
     }, []);
 
-    const crearCliente = async () => {
-        await apiFetch(
-            "/clientes",
-            {
-                method:"POST",
-                body:JSON.stringify(form)
-            }
-        );
-
-        setForm({
-            nombre:"",
-            email:"",
-            telefono:""
-        });
-
-        cargar();
+    const cargar = async () => {
+        const data = await obtenerClientes();
+        setClientes(data);
     };
 
-    const eliminarCliente = async (id) => {
-        await apiFetch(
-            `/clientes/${id}`,
-            {
-                method:"DELETE"
-            }
-        );
+    const iniciarEdicion = (c) => {
+        setEditando(c.id_clien);
 
+        setForm({
+            nombre: c.nombre,
+            email: c.email,
+            telefono: c.telefono
+        });
+    };
+
+    const guardar = async (id) => {
+        await actualizarCliente(id, form);
+        setEditando(null);
         cargar();
     };
 
@@ -54,54 +42,12 @@ export const ClientesPage = () => {
         <div>
             <Navbar />
             <div className="page">
-                <h1>Clientes</h1>
-                <div className="card">
-                    <h2>
-                        Nuevo Cliente
-                    </h2>
-
-                    <div className="form-grid">
-                        <input
-                            placeholder="Nombre"
-                            value={form.nombre}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    nombre:e.target.value
-                                })
-                            }
-                        />
-
-                        <input
-                            placeholder="Email"
-                            value={form.email}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    email:e.target.value
-                                })
-                            }
-                        />
-
-                        <input
-                            placeholder="Teléfono"
-                            value={form.telefono}
-                            onChange={(e)=>
-                                setForm({
-                                    ...form,
-                                    telefono:e.target.value
-                                })
-                            }
-                        />
-                    </div>
-
-                    <button onClick={crearCliente}>
-                        Crear Cliente
-                    </button>
-                </div>
+                <h1>
+                    Clientes
+                </h1>
 
                 <div className="card">
-                    <table>
+                    <table className="styled-table">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -116,23 +62,99 @@ export const ClientesPage = () => {
                             {
                                 clientes.map(c => (
                                     <tr key={c.id_clien}>
-                                        <td>{c.id_clien}</td>
-                                        <td>{c.nombre}</td>
-                                        <td>{c.email}</td>
-                                        <td>{c.telefono}</td>
                                         <td>
-                                            <div className="actions">
-                                                <button
-                                                    className="btn-danger"
-                                                    onClick={() =>
-                                                        eliminarCliente(
-                                                            c.id_clien
-                                                        )
-                                                    }
-                                                >
-                                                    Eliminar
-                                                </button>
-                                            </div>
+                                            {c.id_clien}
+                                        </td>
+
+                                        <td>
+                                            {
+                                                editando === c.id_clien
+                                                    ? (
+                                                        <input
+                                                            value={
+                                                                form.nombre
+                                                            }
+                                                            onChange={(e) =>
+                                                                setForm({
+                                                                    ...form,
+                                                                    nombre:
+                                                                        e.target.value
+                                                                })
+                                                            }
+                                                        />
+                                                    )
+                                                    : c.nombre
+                                            }
+                                        </td>
+
+                                        <td>
+                                            {
+                                                editando === c.id_clien
+                                                    ? (
+                                                        <input
+                                                            value={
+                                                                form.email
+                                                            }
+                                                            onChange={(e) =>
+                                                                setForm({
+                                                                    ...form,
+                                                                    email:
+                                                                        e.target.value
+                                                                })
+                                                            }
+                                                        />
+                                                    )
+                                                    : c.email
+                                            }
+                                        </td>
+
+                                        <td>
+                                            {
+                                                editando === c.id_clien
+                                                    ? (
+                                                        <input
+                                                            value={
+                                                                form.telefono
+                                                            }
+                                                            onChange={(e) =>
+                                                                setForm({
+                                                                    ...form,
+                                                                    telefono:
+                                                                        e.target.value
+                                                                })
+                                                            }
+                                                        />
+                                                    )
+                                                    : c.telefono
+                                            }
+                                        </td>
+
+                                        <td>
+                                            {
+                                                editando === c.id_clien
+                                                    ? (
+                                                        <button
+                                                            className="success-btn"
+                                                            onClick={() =>
+                                                                guardar(
+                                                                    c.id_clien
+                                                                )
+                                                            }
+                                                        >
+                                                            Guardar
+                                                        </button>
+                                                    )
+                                                    : (
+                                                        <button
+                                                            className="primary-btn"
+                                                            onClick={() =>
+                                                                iniciarEdicion(c)
+                                                            }
+                                                        >
+                                                            Editar
+                                                        </button>
+                                                    )
+                                            }
                                         </td>
                                     </tr>
                                 ))

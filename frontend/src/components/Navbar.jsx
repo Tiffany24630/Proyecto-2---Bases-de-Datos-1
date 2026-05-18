@@ -1,58 +1,74 @@
 import React from "react";
 
 export const Navbar = () => {
-    const rol =
-        localStorage.getItem("rol");
+    const rol = localStorage.getItem("rol");
+    const username = localStorage.getItem("username");
 
     const logout = () => {
         localStorage.clear();
-
-        window.location.hash =
-            "#/login";
+        window.location.hash = "#/login";
+        window.location.reload();
     };
 
     return (
         <nav className="navbar">
-            <a href="#/dashboard">
-                Inicio
-            </a>
+            <div className="navbar-left">
+                <h2 className="logo">
+                    Sistema Tienda
+                </h2>
 
-            {
-                ["admin_r", "vendedor_r"]
-                .includes(rol) && (
-                    <a href="#/clientes">
-                        Clientes
-                    </a>
-                )
-            }
+                <a href="#/dashboard">
+                    Dashboard
+                </a>
 
-            {
-                [
-                    "admin_r",
-                    "inventario_r",
-                    "cliente_r"
-                ].includes(rol) && (
-                    <a href="#/productos">
-                        Productos
-                    </a>
-                )
-            }
+                {
+                    (
+                        rol === "admin_r" ||
+                        rol === "vendedor_r"
+                    ) && (
+                        <a href="#/clientes">
+                            Clientes
+                        </a>
+                    )
+                }
 
-            {
-                [
-                    "admin_r",
-                    "auditor_r"
-                ].includes(rol) && (
-                    <a href="#/reportes">
-                        Reportes
-                    </a>
-                )
-            }
+                {
+                    (
+                        rol === "admin_r" ||
+                        rol === "inventario_r" ||
+                        rol === "cliente_r" ||
+                        rol === "vendedor_r"
+                    ) && (
+                        <a href="#/productos">
+                            Productos
+                        </a>
+                    )
+                }
 
-            <button onClick={logout}>
-                Logout
-            </button>
+                {
+                    (
+                        rol === "admin_r" ||
+                        rol === "auditor_r"
+                    ) && (
+                        <a href="#/reportes">
+                            Reportes
+                        </a>
+                    )
+                }
+            </div>
 
+            <div className="navbar-right">
+                <span>
+                    {username}
+                </span>
+
+                <button
+                    onClick={logout}
+                    className="danger-btn"
+                >
+                    Salir
+                </button>
+            </div>
         </nav>
     );
 };
