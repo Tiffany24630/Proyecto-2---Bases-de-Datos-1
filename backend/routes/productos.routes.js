@@ -1,5 +1,5 @@
 import express from "express";
-import {getProductos, createProducto, updateStockProducto, deleteProducto} from "../controllers/producto.controller.js";
+import {getProductos, createProducto, updateStockProducto, deleteProducto, updateProducto} from "../controllers/producto.controller.js";
 import {verifyToken} from "../middlewares/auth.middleware.js";
 import {requireRole} from "../middlewares/role.middleware.js";
 
@@ -65,6 +65,16 @@ router.put(
     "inventario_r"
   ),
   updateStockProducto
+);
+
+router.put(
+  "/:id",
+  verifyToken,
+  requireRole(
+    "admin_r",
+    "inventario_r"
+  ),
+  updateProducto
 );
 
 /**

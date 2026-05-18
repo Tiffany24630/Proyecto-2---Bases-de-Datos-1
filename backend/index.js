@@ -8,6 +8,7 @@ import clientesRoutes from "./routes/clientes.routes.js";
 import productosRoutes from "./routes/productos.routes.js";
 import ventasRoutes from "./routes/ventas.routes.js";
 import swaggerOptions from "./swagger.js";
+import sequelize from "./config/sequelize.js";
 
 dotenv.config();
 
@@ -16,15 +17,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const swaggerSpec =
-  swaggerJsdoc(swaggerOptions);
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec)
-);
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/auth", authRoutes);
 app.use("/clientes", clientesRoutes);
 app.use("/productos", productosRoutes);
@@ -36,15 +31,30 @@ app.get("/", (req, res) => {
   });
 });
 
-const PORT =
-  process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(
-    `Servidor corriendo en puerto ${PORT}`
-  );
+const startServer = async () => {
+  let connected = false;
 
-  console.log(
-    `Swagger: http://localhost:${PORT}/api-docs`
-  );
-});
+  while (!connected) {
+    try {
+      await sequelize.authenticate();
+      connected = true;
+      console.log("Sequelize conectado correctamente");
+
+    }catch (error){
+      console.log("Esperando PostgreSQL...");
+
+      await new Promise(resolve =>
+        setTimeout(resolve, 5000)
+      );
+    }
+  }
+
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+    console.log(`Swagger: http://localhost:${PORT}/api-docs`);
+  });
+};
+
+startServer();

@@ -1,17 +1,22 @@
 import React, {useEffect, useState} from "react";
 import { Navbar } from "../components/Navbar.jsx";
-import {obtenerClientes, actualizarCliente} from "../services/cliente.service.js";
+import {obtenerClientes, actualizarCliente, crearCliente} from "../services/cliente.service.js";
 
 export const ClientesPage = () => {
     const [clientes, setClientes] = useState([]);
     const [editando, setEditando] = useState(null);
 
-    const [form, setForm] =
-        useState({
-            nombre: "",
-            email: "",
-            telefono: ""
-        });
+    const [form, setForm] = useState({
+        nombre: "",
+        email: "",
+        telefono: ""
+    });
+
+    const [nuevoCliente, setNuevoCliente] = useState({
+        nombre: "",
+        email: "",
+        telefono: ""
+    });
 
     useEffect(() => {
         cargar();
@@ -38,6 +43,18 @@ export const ClientesPage = () => {
         cargar();
     };
 
+    const agregarCliente = async () => {
+        await crearCliente(nuevoCliente);
+
+        setNuevoCliente({
+            nombre: "",
+            email: "",
+            telefono: ""
+        });
+
+        cargar();
+    };
+
     return (
         <div>
             <Navbar />
@@ -45,6 +62,53 @@ export const ClientesPage = () => {
                 <h1>
                     Clientes
                 </h1>
+
+                <div className="card">
+                    <h2>
+                        Agregar Cliente
+                    </h2>
+
+                    <div className="form-grid">
+                        <input
+                            placeholder="Nombre"
+                            value={nuevoCliente.nombre}
+                            onChange={(e) =>
+                                setNuevoCliente({
+                                    ...nuevoCliente,
+                                    nombre: e.target.value
+                                })
+                            }
+                        />
+
+                        <input
+                            placeholder="Email"
+                            value={nuevoCliente.email}
+                            onChange={(e) =>
+                                setNuevoCliente({
+                                    ...nuevoCliente,
+                                    email: e.target.value
+                                })
+                            }
+                        />
+
+                        <input
+                            placeholder="Teléfono"
+                            value={nuevoCliente.telefono}
+                            onChange={(e) =>
+                                setNuevoCliente({
+                                    ...nuevoCliente,
+                                    telefono: e.target.value
+                                })
+                            }
+                        />
+                        <button
+                            className="success-btn"
+                            onClick={agregarCliente}
+                        >
+                            Agregar
+                        </button>
+                    </div>
+                </div>
 
                 <div className="card">
                     <table className="styled-table">
@@ -71,14 +135,11 @@ export const ClientesPage = () => {
                                                 editando === c.id_clien
                                                     ? (
                                                         <input
-                                                            value={
-                                                                form.nombre
-                                                            }
+                                                            value={form.nombre}
                                                             onChange={(e) =>
                                                                 setForm({
                                                                     ...form,
-                                                                    nombre:
-                                                                        e.target.value
+                                                                    nombre: e.target.value
                                                                 })
                                                             }
                                                         />
@@ -92,14 +153,11 @@ export const ClientesPage = () => {
                                                 editando === c.id_clien
                                                     ? (
                                                         <input
-                                                            value={
-                                                                form.email
-                                                            }
+                                                            value={form.email}
                                                             onChange={(e) =>
                                                                 setForm({
                                                                     ...form,
-                                                                    email:
-                                                                        e.target.value
+                                                                    email: e.target.value
                                                                 })
                                                             }
                                                         />
@@ -113,14 +171,11 @@ export const ClientesPage = () => {
                                                 editando === c.id_clien
                                                     ? (
                                                         <input
-                                                            value={
-                                                                form.telefono
-                                                            }
+                                                            value={form.telefono}
                                                             onChange={(e) =>
                                                                 setForm({
                                                                     ...form,
-                                                                    telefono:
-                                                                        e.target.value
+                                                                    telefono: e.target.value
                                                                 })
                                                             }
                                                         />
@@ -136,9 +191,7 @@ export const ClientesPage = () => {
                                                         <button
                                                             className="success-btn"
                                                             onClick={() =>
-                                                                guardar(
-                                                                    c.id_clien
-                                                                )
+                                                                guardar(c.id_clien)
                                                             }
                                                         >
                                                             Guardar

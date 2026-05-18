@@ -1,16 +1,16 @@
-import pool from "../db.js";
+import Cliente from "../models/cliente.js";
+import sequelize from "../config/sequelize.js";
 
 export const getClientes = async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT *
-      FROM cliente
-      ORDER BY id_clien
-    `);
+    const clientes = await Cliente.findAll({
+      order: [["id_clien", "ASC"]]
+    });
 
-    return res.json(result.rows);
+    return res.json(clientes);
 
   }catch (error){
+
     console.error(error);
 
     return res.status(500).json({
@@ -20,32 +20,37 @@ export const getClientes = async (req, res) => {
 };
 
 export const createCliente = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  
   try {
     const {nombre, email, telefono} = req.body;
 
     if (!nombre || !email || !telefono) {
+      await transaction.rollback();
+
       return res.status(400).json({
-        error:
-          "Todos los campos son requeridos"
+        error: "Todos los campos son requeridos"
       });
     }
 
-    await pool.query(
-      `
-      CALL registrar_cliente(
-        $1,
-        $2,
-        $3
-      )
-      `,
-      [nombre, telefono, email]
+    const cliente = await Cliente.create(
+      {
+        nombre,
+        email,
+        telefono
+      },
+      { transaction }
     );
 
+    await transaction.commit();
+
     return res.json({
-      mensaje: "Cliente creado"
+      mensaje: "Cliente creado",
+      cliente
     });
 
   }catch (error){
+    await transaction.rollback();
     console.error(error);
 
     return res.status(500).json({
@@ -55,62 +60,77 @@ export const createCliente = async (req, res) => {
 };
 
 export const updateCliente = async (req, res) => {
+  const transaction = await sequelize.transaction();
+
   try {
     const { id } = req.params;
-
     const {nombre, email, telefono} = req.body;
+    const cliente = await Cliente.findByPk(id);
 
-    await pool.query(
-      `
-      UPDATE cliente
-      SET
-        nombre = $1,
-        email = $2,
-        telefono = $3
-      WHERE id_clien = $4
-      `,
-      [nombre, email, telefono, id]
+    if (!cliente) {
+      await transaction.rollback();
+
+      return res.status(404).json({
+        error: "Cliente no encontrado"
+      });
+    }
+
+    await cliente.update(
+      {
+        nombre,
+        email,
+        telefono
+      },
+      { transaction }
     );
 
+    await transaction.commit();
+
     return res.json({
-      mensaje:
-        "Cliente actualizado"
+      mensaje: "Cliente actualizado"
     });
 
   }catch (error){
+    await transaction.rollback();
     console.error(error);
 
     return res.status(500).json({
-      error:
-        "Error actualizando cliente"
+      error: "Error actualizando cliente"
     });
   }
 };
 
 export const deleteCliente = async (req, res) => {
-  try {
-    const { id } =
-      req.params;
+  const transaction = await sequelize.transaction();
 
-    await pool.query(
-      `
-      DELETE FROM cliente
-      WHERE id_clien = $1
-      `,
-      [id]
-    );
+  try {
+    const { id } = req.params;
+    const cliente = await Cliente.findByPk(id);
+
+    if (!cliente) {
+      await transaction.rollback();
+
+      return res.status(404).json({
+        error: "Cliente no encontrado"
+      });
+    }
+
+    await cliente.destroy({
+      transaction
+    });
+
+    await transaction.commit();
 
     return res.json({
-      mensaje:
-        "Cliente eliminado"
+      mensaje: "Cliente eliminado"
     });
 
   }catch (error){
+    await transaction.rollback();
     console.error(error);
 
     return res.status(500).json({
-      error:
-        "Error eliminando cliente"
+      error: "Error eliminando cliente"
     });
   }
 };

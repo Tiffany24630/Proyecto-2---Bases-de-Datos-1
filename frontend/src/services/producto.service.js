@@ -16,6 +16,16 @@ export const crearProducto = async (producto) => {
     );
 };
 
+export const editarProducto = async (id, producto) => {
+    return await apiFetch(
+        `/productos/${id}`,
+        {
+            method: "PUT",
+            body: JSON.stringify(producto)
+        }
+    );
+};
+
 export const actualizarStockProducto = async (id, stock) => {
     return await apiFetch(
         `/productos/${id}/stock`,

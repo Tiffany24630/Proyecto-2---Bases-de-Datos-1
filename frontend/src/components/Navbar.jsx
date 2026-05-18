@@ -1,6 +1,8 @@
 import React from "react";
 
 export const Navbar = () => {
+    const rol = localStorage.getItem("rol");
+
     const logout = () => {
         localStorage.clear();
         window.location.hash = "#/login";
@@ -18,17 +20,36 @@ export const Navbar = () => {
                         Dashboard
                     </a>
 
-                    <a href="#/clientes">
-                        Clientes
-                    </a>
+                    {
+                        ["admin_r", "vendedor_r"].includes(rol) && (
+                            <a href="#/clientes">
+                                Clientes
+                            </a>
+                        )
+                    }
 
-                    <a href="#/productos">
-                        Productos
-                    </a>
+                    {
+                        [
+                            "admin_r",
+                            "inventario_r",
+                            "cliente_r"
+                        ].includes(rol) && (
+                            <a href="#/productos">
+                                Productos
+                            </a>
+                        )
+                    }
 
-                    <a href="#/reportes">
-                        Reportes
-                    </a>
+                    {
+                        [
+                            "admin_r",
+                            "auditor_r"
+                        ].includes(rol) && (
+                            <a href="#/reportes">
+                                Reportes
+                            </a>
+                        )
+                    }
                 </div>
             </div>
 

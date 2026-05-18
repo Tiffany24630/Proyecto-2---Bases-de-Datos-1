@@ -29,12 +29,12 @@ export const ReportesPage = () => {
             <Navbar />
             <div className="page">
                 <h1>
-                    Reportes
+                    Reportes 
                 </h1>
 
                 <div className="card">
                     <h2>
-                        Reporte Ventas
+                        Reporte Ventas (Join)
                     </h2>
 
                     <table className="styled-table">
@@ -73,14 +73,14 @@ export const ReportesPage = () => {
 
                 <div className="card">
                     <h2>
-                        Productos arriba del promedio
+                        Clientes y cantidad de ventas (Subquery)
                     </h2>
 
                     <table className="styled-table">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Precio</th>
+                                <th>Cantidad de Ventas</th>
                             </tr>
                         </thead>
 

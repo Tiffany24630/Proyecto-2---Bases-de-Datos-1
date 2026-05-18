@@ -46,13 +46,13 @@ Productos:
 
 ## Roles y permisos
 
-| Rol | Permisos |
-|------|----------|
-| admin_r | Acceso completo |
-| vendedor_r | Crear ventas y detalle_venta |
-| inventario_r | CRUD productos |
-| auditor_r | Consultar reportes |
-| cliente_r | Consultar productos |
+| Rol | Permisos | Usuario actual | Contraseña |
+|------|----------|----------|----------|
+| admin_r | Acceso completo | admin1 | 1234 |
+| vendedor_r | Crear ventas y detalle_venta | vendedor1 | 1234 |
+| inventario_r | CRUD productos | inventario1 | 1234 |
+| auditor_r | Consultar reportes | auditor1 | 1234 |
+| cliente_r | Consultar productos | cliente1 | 1234 |
 
 ## Docker
 El proyecto está completamente containerizado:

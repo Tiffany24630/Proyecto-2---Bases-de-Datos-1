@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import { Navbar } from "../components/Navbar.jsx";
-import {obtenerProductos, actualizarStockService} from "../services/producto.service.js";
+import {obtenerProductos} from "../services/producto.service.js";
 import {crearVentaService} from "../services/venta.service.js";
 
 export const DashboardPage = () => {
@@ -118,16 +118,6 @@ export const DashboardPage = () => {
             return;
         }
 
-        for (const item of carrito) {
-            const producto = productos.find(p => p.id_prod === item.id_prod);
-
-            await actualizarStockService(
-                item.id_prod,
-                producto.stock -
-                item.cantidad
-            );
-        }
-
         alert("Venta creada");
         setCarrito([]);
         cargarProductos();
@@ -168,73 +158,6 @@ export const DashboardPage = () => {
                                         )
                                     }
                                 />
-                            </div>
-
-                            <div className="card">
-                                <h2>
-                                    Productos
-                                </h2>
-
-                                <table className="styled-table">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Nombre</th>
-                                            <th>Precio</th>
-                                            <th>Stock</th>
-                                            <th>Categoría</th>
-                                            <th>Proveedor</th>
-                                            <th></th>
-                                        </tr>
-                                    </thead>
-
-                                    <tbody>
-                                        {
-                                            productos.map(p => (
-                                                <tr key={p.id_prod}>
-                                                    <td>
-                                                        {p.id_prod}
-                                                    </td>
-
-                                                    <td>
-                                                        {p.nombre}
-                                                    </td>
-
-                                                    <td>
-                                                        Q{
-                                                            parseFloat(
-                                                                p.precio
-                                                            ).toFixed(2)
-                                                        }
-                                                    </td>
-
-                                                    <td>
-                                                        {p.stock}
-                                                    </td>
-
-                                                    <td>
-                                                        {p.categoria}
-                                                    </td>
-
-                                                    <td>
-                                                        {p.proveedor}
-                                                    </td>
-
-                                                    <td>
-                                                        <button
-                                                            className="btn-green"
-                                                            onClick={() =>
-                                                                agregarProducto(p)
-                                                            }
-                                                        >
-                                                            +
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        }
-                                    </tbody>
-                                </table>
                             </div>
 
                             <div className="card">
@@ -318,6 +241,73 @@ export const DashboardPage = () => {
                                 >
                                     Crear Venta
                                 </button>
+                            </div>
+
+                            <div className="card">
+                                <h2>
+                                    Productos
+                                </h2>
+
+                                <table className="styled-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nombre</th>
+                                            <th>Precio</th>
+                                            <th>Stock</th>
+                                            <th>Categoría</th>
+                                            <th>Proveedor</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {
+                                            productos.map(p => (
+                                                <tr key={p.id_prod}>
+                                                    <td>
+                                                        {p.id_prod}
+                                                    </td>
+
+                                                    <td>
+                                                        {p.nombre}
+                                                    </td>
+
+                                                    <td>
+                                                        Q{
+                                                            parseFloat(
+                                                                p.precio
+                                                            ).toFixed(2)
+                                                        }
+                                                    </td>
+
+                                                    <td>
+                                                        {p.stock}
+                                                    </td>
+
+                                                    <td>
+                                                        {p.categoria}
+                                                    </td>
+
+                                                    <td>
+                                                        {p.proveedor}
+                                                    </td>
+
+                                                    <td>
+                                                        <button
+                                                            className="btn-green"
+                                                            onClick={() =>
+                                                                agregarProducto(p)
+                                                            }
+                                                        >
+                                                            +
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        }
+                                    </tbody>
+                                </table>
                             </div>
                         </>
                     )
