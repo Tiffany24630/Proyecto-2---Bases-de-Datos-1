@@ -45,6 +45,9 @@ CREATE OR REPLACE PROCEDURE eliminar_producto(
 )
 LANGUAGE plpgsql AS $$
 BEGIN
+    DELETE FROM detalle_venta
+    WHERE id_prod = p_id;
+
     DELETE FROM producto
     WHERE id_prod = p_id;
 END;

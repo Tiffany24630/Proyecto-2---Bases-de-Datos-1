@@ -93,10 +93,7 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{p.total
-                                                ? parseFloat(p.total).toFixed(2)
-                                                : "0.00"
-                                            }
+                                            {p.total_ventas}
                                         </td>
                                     </tr>
                                 ))
@@ -127,10 +124,7 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{c.total
-                                                ? parseFloat(c.total).toFixed(2)
-                                                : "0.00"
-                                            }
+                                            {c.total}
                                         </td>
                                     </tr>
                                 ))
@@ -148,7 +142,7 @@ export const ReportesPage = () => {
                         <thead>
                             <tr>
                                 <th>Cliente</th>
-                                <th>Total</th>
+                                <th>ID Venta</th>
                             </tr>
                         </thead>
 
@@ -161,10 +155,7 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{v.total
-                                                ? parseFloat(v.total).toFixed(2)
-                                                : "0.00"
-                                            }
+                                            {v.id_ven}
                                         </td>
                                     </tr>
                                 ))

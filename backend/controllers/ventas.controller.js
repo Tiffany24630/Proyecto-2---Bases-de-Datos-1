@@ -122,23 +122,22 @@ export const crearVenta = async (req, res) => {
 
 export const reporteVentas = async (req, res) => {
   try {
-    const result =
-      await pool.query(
+    const result = await pool.query(
         `
         SELECT
           v.id_ven,
-          v.fecha,
           c.nombre AS cliente,
-          p.nombre AS producto,
-          dv.cantidad,
-          dv.precio_unit
+          SUM(
+            dv.cantidad * dv.precio_unit
+          ) AS total
         FROM venta v
         INNER JOIN cliente c
           ON v.id_clien = c.id_clien
         INNER JOIN detalle_venta dv
           ON v.id_ven = dv.id_ven
-        INNER JOIN producto p
-          ON dv.id_prod = p.id_prod
+        GROUP BY
+          v.id_ven,
+          c.nombre
         ORDER BY v.id_ven
         `
       );
@@ -147,7 +146,7 @@ export const reporteVentas = async (req, res) => {
       result.rows
     );
 
-  }catch (error){
+  } catch (error) {
     console.error(error);
 
     return res.status(500).json({
