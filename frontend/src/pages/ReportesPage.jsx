@@ -1,22 +1,24 @@
-import React, {
-    useEffect,
-    useState
-} from "react";
+import React, {useEffect, useState} from "react";
 import { Navbar } from "../components/Navbar.jsx";
 import { apiFetch } from "../services/api.js";
 
 export const ReportesPage = () => {
-    const [reportes, setReportes] =
-        useState([]);
+    const [ventas, setVentas] = useState([]);
+    const [subquery, setSubquery] = useState([]);
+    const [cte, setCte] = useState([]);
+    const [vista, setVista] = useState([]);
 
     useEffect(() => {
         const cargar = async () => {
-            const data =
-                await apiFetch(
-                    "/reporte-ventas"
-                );
+            const dataVentas = await apiFetch("/reporte-ventas");
+            const dataSubquery = await apiFetch("/reporte-subquery");
+            const dataCTE = await apiFetch("/reporte-cte");
+            const dataVista = await apiFetch("/vista-ventas");
 
-            setReportes(data);
+            setVentas(dataVentas);
+            setSubquery(dataSubquery);
+            setCte(dataCTE);
+            setVista(dataVista);
         };
         cargar();
     }, []);
@@ -26,6 +28,9 @@ export const ReportesPage = () => {
             <Navbar />
             <div className="page">
                 <h1>Reportes</h1>
+                <h2>
+                    Reporte Ventas
+                </h2>
                 <table>
                     <thead>
                         <tr>
@@ -37,11 +42,96 @@ export const ReportesPage = () => {
 
                     <tbody>
                         {
-                            reportes.map(r => (
-                                <tr key={r.id_ven}>
-                                    <td>{r.id_ven}</td>
-                                    <td>{r.cliente}</td>
-                                    <td>{r.total}</td>
+                            ventas.map(v => (
+                                <tr key={v.id_ven}>
+                                    <td>{v.id_ven}</td>
+                                    <td>{v.cliente}</td>
+                                    <td>{v.total}</td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </table>
+
+                <h2>
+                    Productos arriba del promedio
+                </h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {
+                            subquery.map((p, i) => (
+                                <tr key={i}>
+                                    <td>{p.nombre}</td>
+                                    <td>{p.precio}</td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </table>
+
+                <h2>
+                    Clientes y total gastado
+                </h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Total Gastado</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {
+                            cte.map((c, i) => (
+                                <tr key={i}>
+                                    <td>{c.nombre}</td>
+                                    <td>{c.total_gastado}</td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </table>
+
+                <h2>
+                    Vista Ventas
+                </h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            {
+                                vista.length > 0 &&
+                                Object.keys(vista[0]).map(k => (
+                                    <th key={k}>
+                                        {k}
+                                    </th>
+                                ))
+                            }
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {
+                            vista.map((v, i) => (
+                                <tr key={i}>
+                                    {
+                                        Object.values(v).map(
+                                            (value, j) => (
+                                                <td key={j}>
+                                                    {value}
+                                                </td>
+                                            )
+                                        )
+                                    }
                                 </tr>
                             ))
                         }

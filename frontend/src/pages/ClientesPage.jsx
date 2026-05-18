@@ -1,21 +1,13 @@
-import React, {
-    useEffect,
-    useState
-} from "react";
+import React, {useEffect, useState} from "react";
 import { Navbar } from "../components/Navbar.jsx";
-import {
-    obtenerClientes
-} from "../services/cliente.service.js";
+import {obtenerClientes} from "../services/cliente.service.js";
 
 export const ClientesPage = () => {
-    const [clientes, setClientes] =
-        useState([]);
+    const [clientes, setClientes] = useState([]);
 
     useEffect(() => {
         const cargar = async () => {
-            const data =
-                await obtenerClientes();
-
+            const data = await obtenerClientes();
             setClientes(data);
         };
         cargar();

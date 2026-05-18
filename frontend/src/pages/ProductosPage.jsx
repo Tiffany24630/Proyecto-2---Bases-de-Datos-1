@@ -1,24 +1,15 @@
-import React, {
-    useEffect,
-    useState
-} from "react";
+import React, {useEffect, useState} from "react";
 import { Navbar } from "../components/Navbar.jsx";
-import {
-    obtenerProductos
-} from "../services/producto.service.js";
+import {obtenerProductos} from "../services/producto.service.js";
 
 export const ProductosPage = () => {
-    const [productos, setProductos] =
-        useState([]);
+    const [productos, setProductos] = useState([]);
 
     useEffect(() => {
         const cargar = async () => {
-            const data =
-                await obtenerProductos();
-
+            const data = await obtenerProductos();
             setProductos(data);
         };
-
         cargar();
     }, []);
 
