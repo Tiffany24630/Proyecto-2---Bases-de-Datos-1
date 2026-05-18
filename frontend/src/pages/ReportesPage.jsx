@@ -59,7 +59,7 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{v.total}
+                                            Q{Number(v.total).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))
@@ -90,7 +90,7 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{p.precio}
+                                            Q{Number(p.precio).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))
@@ -121,7 +121,7 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{c.total_gastado}
+                                            Q{Number(c.total_gastado).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))
@@ -152,7 +152,7 @@ export const ReportesPage = () => {
                                         </td>
 
                                         <td>
-                                            Q{v.total}
+                                            Q{Number(v.total).toFixed(2)}
                                         </td>
                                     </tr>
                                 ))
