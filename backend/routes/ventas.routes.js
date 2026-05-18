@@ -3,8 +3,7 @@ import {crearVenta, reporteVentas, reporteSubquery, reporteCTE, vistaVentas} fro
 import {verifyToken} from "../middlewares/auth.middleware.js";
 import {requireRole} from "../middlewares/role.middleware.js";
 
-const router =
-  express.Router();
+const router = express.Router();
 
 router.post(
   "/venta",

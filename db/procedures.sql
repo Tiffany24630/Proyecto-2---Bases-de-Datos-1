@@ -10,6 +10,8 @@ GRANT SELECT, INSERT ON detalle_venta TO vendedor_r;
 GRANT SELECT ON producto TO cliente_r;
 GRANT SELECT ON venta TO auditor_r;
 GRANT SELECT ON detalle_venta TO auditor_r;
+REVOKE DELETE ON venta FROM vendedor_r;
+REVOKE UPDATE ON producto FROM cliente_r;
 
 --Procedimientos almacenados para operaciones comunes 
 CREATE OR REPLACE PROCEDURE crear_producto(

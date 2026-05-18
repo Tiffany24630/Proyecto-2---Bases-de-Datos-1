@@ -7,15 +7,17 @@
 ## Ejecución
 
 1. Clonar repositorio:
-    git clone <URL_DEL_REPO>
+    git clone https://github.com/Tiffany24630/Proyecto-2---Bases-de-Datos-1.git 
     cd Proyecto-2---Bases-de-Datos-1
 
 2. Crear archivo .env basado en .env.example:
-    DB_USER=proy2
-    DB_PASSWORD=secret
-    DB_NAME=proy2
+    PORT=3000
     DB_HOST=db
     DB_PORT=5432
+    DB_USER=proy3
+    DB_PASSWORD=secret
+    DB_NAME=tienda
+    JWT_SECRET=super_secret_key
 
 3. Ejecutar:
     docker compose up --build
@@ -41,6 +43,16 @@ Productos:
 - GET /vista-ventas (VIEW)
 - GET /reporte-cte (CTE WITH)
 - POST /venta (TRANSACCIÓN con BEGIN, COMMIT y ROLLBACK en caso de error)
+
+## Roles y permisos
+
+| Rol | Permisos |
+|------|----------|
+| admin_r | Acceso completo |
+| vendedor_r | Crear ventas y detalle_venta |
+| inventario_r | CRUD productos |
+| auditor_r | Consultar reportes |
+| cliente_r | Consultar productos |
 
 ## Docker
 El proyecto está completamente containerizado:
