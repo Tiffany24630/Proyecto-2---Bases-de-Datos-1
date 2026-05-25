@@ -103,4 +103,9 @@ INSERT INTO usuarios(username, password, rol) VALUES
 ('vendedor1', '1234', 'vendedor_r'),
 ('inventario1', '1234', 'inventario_r'),
 ('auditor1', '1234', 'auditor_r'),
-('cliente1', '1234', 'cliente_r');
+('cliente1', '1234', 'cliente_r'),
+('admin12', '1234', 'admin_r'),
+('vendedor2', '1234', 'vendedor_r'),
+('inventario2', '1234', 'inventario_r'),
+('auditor2', '1234', 'auditor_r'),
+('cliente2', '1234', 'cliente_r');

@@ -1,7 +1,7 @@
 import express from "express";
 import pool from "./db.js";
 import cors from "cors";
-
+import jwt from "jsonwebtoken";
 import { verifyToken } from "./middlewares/auth.middleware.js";
 import { requireRole } from "./middlewares/role.middleware.js";
 
@@ -13,14 +13,63 @@ app.use(cors({
 
 app.use(express.json());
 
+app.post("/login", async (req, res) => {
+  try {
+    const {
+      username,
+      password
+    } = req.body;
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM usuarios
+      WHERE username = $1
+      AND password = $2
+      `,
+      [username, password]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        error: "Usuario no encontrado"
+      });
+    }
+
+    const usuario = result.rows[0];
+
+    const token = jwt.sign(
+      {
+        username: usuario.username,
+        rol: usuario.rol
+      },
+      "secretkey",
+      {
+        expiresIn: "8h"
+      }
+    );
+
+    res.json({
+      token,
+      rol: usuario.rol,
+      username: usuario.username
+    });
+
+  }catch (error){
+    console.error(error);
+
+    res.status(500).json({
+      error: "Error login"
+    });
+  }
+});
+
 app.get(
   "/clientes",
   verifyToken,
   requireRole("admin_r", "vendedor_r"),
   async (req, res) => {
-
     try {
-
       const result = await pool.query(`
         SELECT *
         FROM cliente
@@ -29,8 +78,7 @@ app.get(
 
       res.json(result.rows);
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -45,9 +93,7 @@ app.post(
   verifyToken,
   requireRole("admin_r"),
   async (req, res) => {
-
     try {
-
       const {
         nombre,
         email,
@@ -71,8 +117,7 @@ app.post(
         mensaje: "Cliente creado"
       });
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -87,9 +132,7 @@ app.put(
   verifyToken,
   requireRole("admin_r"),
   async (req, res) => {
-
     try {
-
       const { id } = req.params;
 
       const {
@@ -113,8 +156,7 @@ app.put(
         mensaje: "Cliente actualizado"
       });
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -129,9 +171,7 @@ app.delete(
   verifyToken,
   requireRole("admin_r"),
   async (req, res) => {
-
     try {
-
       const { id } = req.params;
 
       await pool.query(
@@ -146,8 +186,7 @@ app.delete(
         mensaje: "Cliente eliminado"
       });
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -167,9 +206,7 @@ app.get(
     "vendedor_r"
   ),
   async (req, res) => {
-
     try {
-
       const result = await pool.query(`
         SELECT *
         FROM producto
@@ -178,8 +215,7 @@ app.get(
 
       res.json(result.rows);
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -197,9 +233,7 @@ app.post(
     "inventario_r"
   ),
   async (req, res) => {
-
     try {
-
       const {
         nombre,
         precio,
@@ -225,8 +259,7 @@ app.post(
         mensaje: "Producto creado"
       });
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -244,11 +277,8 @@ app.put(
     "inventario_r"
   ),
   async (req, res) => {
-
     try {
-
       const { id } = req.params;
-
       const { stock } = req.body;
 
       await pool.query(
@@ -262,8 +292,7 @@ app.put(
         mensaje: "Stock actualizado"
       });
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -281,9 +310,7 @@ app.delete(
     "inventario_r"
   ),
   async (req, res) => {
-
     try {
-
       const { id } = req.params;
 
       await pool.query(
@@ -297,8 +324,7 @@ app.delete(
         mensaje: "Producto eliminado"
       });
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -316,15 +342,17 @@ app.post(
     "vendedor_r"
   ),
   async (req, res) => {
-
-    const client = await pool.connect();
-
     try {
-
       const {
         detalles,
         id_clien
       } = req.body;
+
+      if (!id_clien) {
+        return res.status(400).json({
+          error: "Debe enviar id_clien"
+        });
+      }
 
       if (!detalles || detalles.length === 0) {
         return res.status(400).json({
@@ -332,92 +360,34 @@ app.post(
         });
       }
 
-      await client.query("BEGIN");
-
-      const venta = await client.query(
-        `
-        INSERT INTO venta
-        (fecha, id_clien, id_emp)
-        VALUES (NOW(), $1, 1)
-        RETURNING id_ven
-        `,
-        [id_clien]
-      );
-
-      const idVenta = venta.rows[0].id_ven;
-
       for (const d of detalles) {
-
-        const producto = await client.query(
-          `
-          SELECT stock
-          FROM producto
-          WHERE id_prod = $1
-          `,
-          [d.id_prod]
-        );
-
-        if (producto.rows.length === 0) {
-          throw new Error("Producto no encontrado");
-        }
-
-        const stock = producto.rows[0].stock;
-
-        if (stock < d.cantidad) {
-          throw new Error(
-            `Stock insuficiente para producto ${d.id_prod}`
-          );
-        }
-
-        await client.query(
-          `
-          INSERT INTO detalle_venta
-          (
-            cantidad,
-            precio_unit,
-            id_ven,
-            id_prod
-          )
-          VALUES ($1, $2, $3, $4)
-          `,
-          [
-            d.cantidad,
-            d.precio,
-            idVenta,
-            d.id_prod
-          ]
-        );
-
-        await client.query(
-          `
-          UPDATE producto
-          SET stock = stock - $1
-          WHERE id_prod = $2
-          `,
-          [d.cantidad, d.id_prod]
+        await pool.query(
+            `
+            CALL crear_venta(
+                $1,
+                $2,
+                $3,
+                $4
+            )
+            `,
+            [
+                id_clien,
+                d.id_prod,
+                d.cantidad,
+                d.precio
+            ]
         );
       }
-
-      await client.query("COMMIT");
-
       res.json({
-        mensaje: "Venta creada",
-        idVenta
+        mensaje: "Venta creada correctamente"
       });
 
-    } catch (error) {
-
-      await client.query("ROLLBACK");
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
         error: error.message
       });
-
-    } finally {
-
-      client.release();
     }
   }
 );
@@ -430,9 +400,7 @@ app.get(
     "auditor_r"
   ),
   async (req, res) => {
-
     try {
-
       const result = await pool.query(`
         SELECT
           v.id_ven,
@@ -455,8 +423,7 @@ app.get(
 
       res.json(result.rows);
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -474,9 +441,7 @@ app.get(
     "auditor_r"
   ),
   async (req, res) => {
-
     try {
-
       const result = await pool.query(`
         SELECT
           nombre,
@@ -491,8 +456,7 @@ app.get(
 
       res.json(result.rows);
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -510,9 +474,7 @@ app.get(
     "auditor_r"
   ),
   async (req, res) => {
-
     try {
-
       const result = await pool.query(`
         WITH ventas_totales AS (
           SELECT
@@ -536,8 +498,7 @@ app.get(
 
       res.json(result.rows);
 
-    } catch (error) {
-
+    }catch (error){
       console.error(error);
 
       res.status(500).json({
@@ -555,9 +516,7 @@ app.get(
     "auditor_r"
   ),
   async (req, res) => {
-
     try {
-
       const result = await pool.query(`
         SELECT *
         FROM vista_ventas
@@ -565,12 +524,70 @@ app.get(
 
       res.json(result.rows);
 
-    } catch (error) {
-
+    } catch (error){
       console.error(error);
 
       res.status(500).json({
         error: "Error vista"
+      });
+    }
+  }
+);
+
+app.get(
+  "/debug/roles",
+  verifyToken,
+  requireRole("admin_r"),
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT
+          rolname
+        FROM pg_roles
+        WHERE rolname IN (
+          'admin_r',
+          'vendedor_r',
+          'inventario_r',
+          'auditor_r',
+          'cliente_r'
+        )
+        ORDER BY rolname
+      `);
+
+      res.json(result.rows);
+
+    }catch (error){
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message
+      });
+    }
+  }
+);
+
+app.get(
+  "/debug/procedures",
+  verifyToken,
+  requireRole("admin_r"),
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT
+          routine_name
+        FROM information_schema.routines
+        WHERE routine_type = 'PROCEDURE'
+        AND routine_schema = 'public'
+        ORDER BY routine_name
+      `);
+
+      res.json(result.rows);
+
+    }catch (error){
+      console.error(error);
+
+      res.status(500).json({
+        error: error.message
       });
     }
   }

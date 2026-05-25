@@ -128,6 +128,28 @@ db/
 | cliente_r | Consultar productos | cliente1 | 1234 |
 ---
 
+# Evidencia de seguridad DBMS
+
+## Endpoint de roles
+GET /debug/roles
+
+Muestra los roles creados directamente en PostgreSQL.
+
+## Endpoint de procedures
+GET /debug/procedures
+
+Muestra los stored procedures implementados en PostgreSQL.
+
+## Prueba de rollback
+
+En la pantalla de ventas existe un botón:
+
+"Probar Rollback"
+
+Este intenta vender una cantidad imposible de stock para provocar una excepción dentro del stored procedure `crear_venta`.
+
+---
+
 ## Docker
 El proyecto está completamente containerizado:
 
