@@ -111,7 +111,7 @@ export const ReportesPage = () => {
                         <thead>
                             <tr>
                                 <th>Cliente</th>
-                                <th>Total Gastado</th>
+                                <th>Total veces Gastado</th>
                             </tr>
                         </thead>
 
