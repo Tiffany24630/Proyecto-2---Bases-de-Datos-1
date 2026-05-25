@@ -142,11 +142,7 @@ Muestra los stored procedures implementados en PostgreSQL.
 
 ## Prueba de rollback
 
-En la pantalla de ventas existe un botón:
-
-"Probar Rollback"
-
-Este intenta vender una cantidad imposible de stock para provocar una excepción dentro del stored procedure `crear_venta`.
+En la pantalla de ventas, si el usuario intenta comprar de un producto excediendo la cantidad del stock, entonces sale un error dentro del stored procedure `crear_venta`.
 
 ---
 
